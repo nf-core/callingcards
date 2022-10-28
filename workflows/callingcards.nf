@@ -36,6 +36,12 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
+include { SPLIT_FASTQ } from '../subworkflows/local/split_fastq'
+include { BARCODE_QC } from '../subworkflows/local/barcode_qc'
+include { ALIGN } from '../subworkflows/local/align'
+include { QBED } from '../subworkflows/local/qbed'
+include { TO_DB } from '../subworkflows/local/to_db'
+include { SIGNIFICANCE } from '../subworkflows/local/significance'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -71,6 +77,11 @@ workflow CALLINGCARDS {
     )
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
+    SPLIT_FASTQ (
+        ch_input.out.reads
+    )
+    ch_versions = ch_versions.mix(SPLIT_FASTQ.out.versions)
+
     //
     // MODULE: Run FastQC
     //
@@ -78,6 +89,32 @@ workflow CALLINGCARDS {
         INPUT_CHECK.out.reads
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+
+    BARCODE_QC (
+
+    )
+    ch_versions = ch_versions.mix(BARCODE_QC.out.versions)
+
+    ALIGN (
+
+    )
+    ch_versions = ch_versions.mix(ALIGN.out.versions)
+
+    QBED (
+        ALIGN.out.bam
+    )
+    ch_versions = ch_versions.mix(QBED.out.versions)
+
+    TO_DB (
+        BARCODE_QC.out.id_to_bc_map.collect(),
+        QBED.out.collect()
+    )
+    ch_versions = ch_versions.mix(TO_DB.out.versions)
+
+    SIGNIFICANCE (
+        TO_DB.out.experiment_tablenames.collect()
+    )
+    ch_versions = ch_versions.mix(SIGNIFICANCE.out.versions)
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
