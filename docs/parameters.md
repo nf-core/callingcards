@@ -1,4 +1,4 @@
-# nf-core/callingcards-mammals pipeline parameters
+# nf-core/callingcards pipeline parameters
 
 An automated processing pipeline for mammalian bulk calling cards experiments
 
@@ -37,7 +37,7 @@ Define where the pipeline should find input data and save output data.
 |-----------|-----------|-----------|-----------|-----------|-----------|
 | `input` | Path to comma-separated file containing information about the samples in the experiment. <details><summary>Help</summary><small>You will need to
 create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be
-a comma-separated file with 3 columns, and a header row. See (https://nf-co.re/callingcards-mammals/usage#samplesheet-input).</small></details>| `string` |  |  |
+a comma-separated file with 3 columns, and a header row. See (https://nf-co.re/callingcards/usage#samplesheet-input).</small></details>| `string` |  |  |
 | `outdir` | The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure. | `string` |  |  |  |
 | `save_intermediate` | Set this to True to save intermediate files, eg an unsorted bam file prior to a samtools sort step. Defaults to False | `boolean` |  |  |
 | `email` | Email address for completion summary. <details><summary>Help</summary><small>Set this parameter to your e-mail address to get a summary e-mail with

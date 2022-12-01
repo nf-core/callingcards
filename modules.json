@@ -1,6 +1,6 @@
 {
-    "name": "nf-core/callingcards-mammals",
-    "homePage": "https://github.com/nf-core/callingcards-mammals",
+    "name": "nf-core/callingcards",
+    "homePage": "https://github.com/nf-core/callingcards",
     "repos": {
         "https://github.com/nf-core/modules.git": {
             "modules": {

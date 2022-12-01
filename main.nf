@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    nf-core/callingcards-mammals
+    nf-core/callingcards
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Github : https://github.com/nf-core/callingcards
 
@@ -37,7 +37,7 @@ WorkflowMain.initialise(workflow, params, log)
 include { CALLINGCARDS_MAMMALS } from './workflows/callingcards_mammals'
 
 //
-// WORKFLOW: Run main nf-core/callingcards-mammals analysis pipeline
+// WORKFLOW: Run main nf-core/callingcards analysis pipeline
 //
 workflow NFCORE_CALLINGCARDS_MAMMALS {
     CALLINGCARDS_MAMMALS ()

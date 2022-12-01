@@ -51,11 +51,11 @@ export NXF_SINGULARITY_CACHEDIR=singularity
 export SINGULARITY_TMPDIR=$tmp
 export SINGULARITY_CACHEDIR=$tmp
 
-# if the repo is in this directory, then this relative path callingcards-mammals
-# will work. Otherwise, replace callingcards-mammals with the path, relative or
+# if the repo is in this directory, then this relative path callingcards
+# will work. Otherwise, replace callingcards with the path, relative or
 # absolute, to the correct main.nf
 # NOTE: you can also try the test_human profile
-nextflow run callingcards-mammals/main.nf -profile test_human,singularity,htcf -resume
+nextflow run callingcards/main.nf -profile test_human,singularity,htcf -resume
 ```
 
 Launch this with the command
@@ -93,7 +93,7 @@ export NXF_SINGULARITY_CACHEDIR=singularity
 export SINGULARITY_TMPDIR=$tmp
 export SINGULARITY_CACHEDIR=$tmp
 
-nextflow run nf-core-callingcards-mammals -profile test_human,singularity,htcf -resume
+nextflow run nf-core-callingcards -profile test_human,singularity,htcf -resume
 
 ```
 You'll run this with the command `.run_nf.sh` and the process logger will

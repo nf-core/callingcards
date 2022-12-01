@@ -5,6 +5,7 @@ include { SAMTOOLS_BAM_STATS            } from "${projectDir}/subworkflows/samto
 include { PICARD_COLLECTMULTIPLEMETRICS } from "${projectDir}/modules/nf-core/picard/collectmultiplemetrics/main"
 include { PRESEQ_CCURVE                 } from "${projectDir}/modules/nf-core/preseq/ccurve/main"
 include { PARSEBAM                      } from "${projectDir}/modules/local/parse_bam/main"
+include {SAMTOOLS_INDEX                 } from "${projectDir}/modules/nf-core/samtools/index/main"
 
 workflow PROCESS_ALIGNMENTS {
     take:
@@ -45,6 +46,16 @@ workflow PROCESS_ALIGNMENTS {
         fai.map{meta,fai -> fai}
     )
     ch_versions = ch_versions.mix(PARSEBAM.out.versions)
+
+    PARSEBAM.out.passing_bam
+        .mix(PARSEBAM.out.failing_bam)
+        .set{ ch_parse_bam_out }
+
+    SAMTOOLS_INDEX(
+        ch_parse_bam_out
+    )
+    ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
+
 
     emit:
     samtools_stats = SAMTOOLS_BAM_STATS.out.stats

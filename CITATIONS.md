@@ -1,4 +1,4 @@
-# nf-core/callingcards-mammals: Citations
+# nf-core/callingcards: Citations
 
 ## [nf-core](https://pubmed.ncbi.nlm.nih.gov/32055031/)
 

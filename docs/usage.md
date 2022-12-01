@@ -11,7 +11,7 @@ divergence is controlled by setting certain parameters. Suggested default parame
 processing runs are provided through the profiles [yeast](../conf/default_yeast.config) and [mammal](../conf/default_mammal.config). These may be used by simply including them with the `-profile` flag, for instance:
 
 ```
-$ nextflow run callingcards-mammals/main.nf \
+$ nextflow run callingcards/main.nf \
     -profile default_human,singularity \
     -c local.config \
     --input /path/to/samplesheet.csv
@@ -145,7 +145,7 @@ Your profile line should look like this for mammals, for instance:
 The typical command for running the pipeline is as follows:
 
 ```
-$ nextflow run callingcards-mammals/main.nf \
+$ nextflow run callingcards/main.nf \
     -profile default_mammal,singularity \
     -c local.config \
     --input /path/to/your_samplesheet.csv
@@ -167,7 +167,7 @@ file called `params.json` which looks like so:
 in which case the `run` command would look like:
 
 ```bash
-$ nextflow run callingcards-mammals \
+$ nextflow run callingcards \
     -profile default_mammal,singularity \
     -c local.config \
     -params-file path/to/params.json
