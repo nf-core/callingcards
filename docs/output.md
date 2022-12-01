@@ -1,4 +1,4 @@
-# nf-core/callingcards: Output
+# nf-core/callingcards-mammals: Output
 
 ## Introduction
 

@@ -1,73 +1,191 @@
 # nf-core/callingcards: Usage
 
-## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/callingcards/usage](https://nf-co.re/callingcards/usage)
+<!-- ## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/callingcards/usage](https://nf-co.re/callingcards/usage) -->
 
-> _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
+<!-- > _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._ -->
 
 ## Introduction
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
+Calling Cards experiments may be performed in both yeast and mammalian cells. The processing steps diverge, and this
+divergence is controlled by setting certain parameters. Suggested default parameters for yeast and mammalian
+processing runs are provided through the profiles [yeast](../conf/default_yeast.config) and [mammal](../conf/default_mammal.config). These may be used by simply including them with the `-profile` flag, for instance:
+
+```
+$ nextflow run callingcards-mammals/main.nf \
+    -profile default_human,singularity \
+    -c local.config \
+    --input /path/to/samplesheet.csv
+    --fasta /path/to/genome.fasta
+    --output results_20220811
+```
+
+See [`-profile`](#profile) for more details on available profiles.
+
+`local.config` is a [configuration](https://nf-co.re/usage/configuration) file which is the best place to put configuration settings such as what [executor](https://www.nextflow.io/docs/latest/executor.html)
+you wish to use. If your institution already has a configuration profile on nf-core,
+then you should use that profile in the `-profile` flag instead.
 
 ## Samplesheet input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
-
-```bash
---input '[path to samplesheet file]'
-```
-
-### Multiple runs of the same sample
-
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 4 columns, and a header row as shown in the examples below.
 
 ```console
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
+--input '[path to samplesheet file]'
+```
+Or, if you are using a file to save the run parameters (recommended), rather than submitting them on the command line,
+then the file, with only the input set, would look like so:
+
+```json
+
+{
+  "input":"input_samplesheet.csv"
+}
+
 ```
 
 ### Full samplesheet
 
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
+The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 4 columns to match those defined in the table below.
 
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
+A final samplesheet file consisting of single end mammalian reads would look like so:
 
 ```console
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
-CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
-TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,
-TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
+sample,fastq_1,fastq_2,barcode_details
+mouse_AY60-6_50,mouse/test_data/AY60-6_50k_downsampled_mouse.fastq.gz,,mouse/barcode_details.json
+mouse_AY60-6_100,mouse/test_data/AY60-6_100k_downsampled_mouse.fastq.gz,,mouse/barcode_details.json
+mouse_AY09-1_50_lowQuality,mouse/test_data/AY09-1_50k_downsampled_mouse_lowQuality.fastq.gz,,mouse/barcode_details.json
+mouse_AY09-1_100_lowQuality,mouse/test_data/AY09-1_100k_downsampled_mouse_lowQuality.fastq.gz,,mouse/barcode_details.json
+
 ```
 
-| Column    | Description                                                                                                                                                                            |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
+| Column         | Description                                                                                                                                                                            |
+|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `sample`          | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
+| `fastq_1`         | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
+| `fastq_2`         | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".
+| `barcode_details` | Full path to the barcode details json file for a given sample. |
 
-An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
+An [example samplesheet](../assets/human/input_samplesheet.csv) has been provided with the pipeline.
+
+### Barcode Details
+
+The barcode details json stores data which allows the pipeline to relate sequence barcodes in the calling cards reads to a given transcription factor.
+
+#### __[Mammals](../assets/human/barcode_details.json)__
+
+Yeast requires three fields: `indicies`, `components` and `tf_map`. Not that most likely,
+you will only ever need to change the `tf_map` component.
+
+| Fields         | Description                                                                                                                                                                            |
+|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `batch`        | Optional. Might be a run, eg run_1234 |
+| `tf`           | Optional. Either ID or symbol of the TF |
+| `r1`           | keys correspond to barcode component names. Each component is a map with keys `trim` which is boolean. Set to true to trim off this portion of the read (NOTE: not used in mammals pipeline. Instead controlled by UMITools). `index` specifies where this component occurs in the read |
+| `r2`           | same as `r1` |
+| `components`   | Each key corresponds to a component in `r1` or `r2` and must be preceeded by `r1` or `r2` as appropriate. Each value is a map where the key `map` is required and lists the expected sequence(s) for that component. optional additional keys are `match_allowance` to allow mismatches > 0, `bam_tag` which is used to add the sequence extracted from the read to the aligned read, `match_type` which controls how the sequences are matched (default is `edit_distance` and appropriate in most circumstances), and `require` is a boolean which, when set to false, allows any number of mismatches in the component without penalty.|
+| `insert_seq`   | A list of sequences expected to be present on the 5' end of the aligned read |[]
+| `max_mismatch` | the maximum number of mismatches allowed in a barcode. By default this is equal to the sum of the mismatches allowed on each component. Set this to less than that sum to fail barcodes which pass component checks, but have more than x number of mismatches overall |[]
+
+```json
+
+{
+    "batch": "",
+    "tf": "",
+    "r1": {
+        "pb": {"trim": true,
+               "index": [0,3]},
+
+        "lrt1": {"trim": true,
+                    "index": [3,28]},
+        "srt": {"trim": true,
+                "index":[28,32]},
+
+        "lrt2": {"trim": true,
+                    "index": [32,38]}
+    },
+    "r2":{},
+    "components": {
+
+        "r1_pb":    {"map":["TAG"],
+                     "match_allowance": 0,
+                     "bam_tag": "PB"},
+
+        "r1_lrt1":  {"map": ["CGTCAATTTTACGCAGACTATCTTT"],
+                     "match_type": "edit_distance",
+                     "match_allowance": 0,
+                     "require": true,
+                     "bam_tag": "L1"},
+        "r1_srt":   {"map": ["CTAG", "CAAC", "CTGA", "GCAT", "GTAC", "CACA", "TGAC", "GTCA",
+                             "CGAT", "CTCT", "GAAG", "TCGA", "CATG", "GTTG", "CTTC", "GCTA",
+                             "GAGA", "GTGT", "CGTA", "TGGT", "GGAA", "ACAC", "TCAG", "TTGG",
+                             "CAGT", "TTTT"],
+                     "match_type": "edit_distance",
+                     "match_allowance": 0,
+                     "require": true,
+                     "bam_tag": "ST"},
+        "r1_lrt2":  {"map": ["GGTTAA"],
+                     "match_type": "edit_distance",
+                     "match_allowance": 0,
+                     "require": true,
+                     "bam_tag": "L2"}
+    },
+    "insert_seq": ["TTAA"],
+    "max_mismatch": 0
+}
+
+
+```
 
 ## Running the pipeline
 
+__*HTCF USERS*__: use the additional profile `htcf` in the `-profile` line.
+Your profile line should look like this for mammals, for instance:
+`default_mammal,htcf,singularity`
+
 The typical command for running the pipeline is as follows:
 
-```bash
-nextflow run nf-core/callingcards --input samplesheet.csv --outdir <OUTDIR> --genome GRCh37 -profile docker
+```
+$ nextflow run callingcards-mammals/main.nf \
+    -profile default_mammal,singularity \
+    -c local.config \
+    --input /path/to/your_samplesheet.csv
+    --fasta /path/to/genome.fa
 ```
 
-This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
+__Note__: you can also save your input parameters in a json format. For
+instance, in the case of the run command above, you could create a
+file called `params.json` which looks like so:
+
+```json
+{
+    "fasta":"/path/to/genome.fa",
+    "input":"/path/to/your_samplesheet.csv"
+}
+
+```
+
+in which case the `run` command would look like:
+
+```bash
+$ nextflow run callingcards-mammals \
+    -profile default_mammal,singularity \
+    -c local.config \
+    -params-file path/to/params.json
+
+```
+
+
+This will launch the pipeline with the `default_mammal` pipeline settings. It will use the `singularity` profile, and
+set user specific system configuration (eg executor settings) in a file called local.config. Parameters such as `input`,
+the path to the samplesheet, `output`, and other run parameters will be set in the params.json file.
+See below for more information about profiles.
 
 Note that the pipeline will create the following files in your working directory:
 
-```bash
-work                # Directory containing the nextflow working files
-<OUTDIR>            # Finished results in specified location (defined with --outdir)
-.nextflow_log       # Log file from Nextflow
+```console
+work            # Directory containing the nextflow working files
+results         # Finished results (configurable, see below)
+.nextflow_log   # Log file from Nextflow
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
 
@@ -76,6 +194,13 @@ work                # Directory containing the nextflow working files
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
 
 ```bash
+$ cd /repo/path/callingcards
+
+$ git pull
+```
+
+#### note this won't work unless this goes onto nf-core
+```console
 nextflow pull nf-core/callingcards
 ```
 
@@ -106,25 +231,36 @@ They are loaded in sequence, so later profiles can overwrite earlier profiles.
 
 If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on the `PATH`. This is _not_ recommended.
 
-- `docker`
-  - A generic configuration profile to be used with [Docker](https://docker.com/)
-- `singularity`
-  - A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
-- `podman`
-  - A generic configuration profile to be used with [Podman](https://podman.io/)
-- `shifter`
-  - A generic configuration profile to be used with [Shifter](https://nersc.gitlab.io/development/shifter/how-to-use/)
-- `charliecloud`
-  - A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
-- `conda`
-  - A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter or Charliecloud.
-- `test`
-  - A profile with a complete configuration for automated testing
-  - Includes links to test data so needs no other parameters
+* `docker`
+    * A generic configuration profile to be used with [Docker](https://docker.com/)
+* `singularity`
+    * A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
+* `podman`
+    * A generic configuration profile to be used with [Podman](https://podman.io/)
+* `shifter`
+    * A generic configuration profile to be used with [Shifter](https://nersc.gitlab.io/development/shifter/how-to-use/)
+* `charliecloud`
+    * A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
+* `conda`
+    * A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter or Charliecloud.
+* `htcf`
+    * A SLURM profile with reasonable parameters for the HTCF cluster
+* `default_yeast`
+    * A profile with suggested configuration for yeast data
+* `default_mammals`
+    * A profile with suggested configuration for human and mouse data
+* `test_yeast`
+    * A profile with a complete configuration for yeast data for automated testing
+    * Includes links to test data -- no other parameters necessary
+* `test_human`
+    * A profile with a complete configuration for human data for automated testing
+    * Mouse data would run through the same steps, hence `default_mammals` is
+      appropriate for both human and mouse
+    * Includes links to test data -- no other parameters necessary
 
 ### `-resume`
 
-Specify this when restarting a pipeline. Nextflow will use cached results from any pipeline steps where the inputs are the same, continuing from where it got to previously. For input to be considered the same, not only the names must be identical but the files' contents as well. For more info about this parameter, see [this blog post](https://www.nextflow.io/blog/2019/demystifying-nextflow-resume.html).
+Specify this when restarting a pipeline. Nextflow will used cached results from any pipeline steps where the inputs are the same, continuing from where it got to previously.
 
 You can also supply a run name to resume a specific run: `-resume [run-name]`. Use the `nextflow log` command to show previous run names.
 
@@ -141,11 +277,11 @@ Whilst the default requirements set within the pipeline will hopefully work for 
 For example, if the nf-core/rnaseq pipeline is failing after multiple re-submissions of the `STAR_ALIGN` process due to an exit code of `137` this would indicate that there is an out of memory issue:
 
 ```console
-[62/149eb0] NOTE: Process `NFCORE_RNASEQ:RNASEQ:ALIGN_STAR:STAR_ALIGN (WT_REP1)` terminated with an error exit status (137) -- Execution is retried (1)
-Error executing process > 'NFCORE_RNASEQ:RNASEQ:ALIGN_STAR:STAR_ALIGN (WT_REP1)'
+[62/149eb0] NOTE: Process `RNASEQ:ALIGN_STAR:STAR_ALIGN (WT_REP1)` terminated with an error exit status (137) -- Execution is retried (1)
+Error executing process > 'RNASEQ:ALIGN_STAR:STAR_ALIGN (WT_REP1)'
 
 Caused by:
-    Process `NFCORE_RNASEQ:RNASEQ:ALIGN_STAR:STAR_ALIGN (WT_REP1)` terminated with an error exit status (137)
+    Process `RNASEQ:ALIGN_STAR:STAR_ALIGN (WT_REP1)` terminated with an error exit status (137)
 
 Command executed:
     STAR \
@@ -169,25 +305,17 @@ Work dir:
 Tip: you can replicate the issue by changing to the process work dir and entering the command `bash .command.run`
 ```
 
-To bypass this error you would need to find exactly which resources are set by the `STAR_ALIGN` process. The quickest way is to search for `process STAR_ALIGN` in the [nf-core/rnaseq Github repo](https://github.com/nf-core/rnaseq/search?q=process+STAR_ALIGN).
-We have standardised the structure of Nextflow DSL2 pipelines such that all module files will be present in the `modules/` directory and so, based on the search results, the file we want is `modules/nf-core/software/star/align/main.nf`.
-If you click on the link to that file you will notice that there is a `label` directive at the top of the module that is set to [`label process_high`](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/modules/nf-core/software/star/align/main.nf#L9).
-The [Nextflow `label`](https://www.nextflow.io/docs/latest/process.html#label) directive allows us to organise workflow processes in separate groups which can be referenced in a configuration file to select and configure subset of processes having similar computing requirements.
-The default values for the `process_high` label are set in the pipeline's [`base.config`](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/conf/base.config#L33-L37) which in this case is defined as 72GB.
-Providing you haven't set any other standard nf-core parameters to **cap** the [maximum resources](https://nf-co.re/usage/configuration#max-resources) used by the pipeline then we can try and bypass the `STAR_ALIGN` process failure by creating a custom config file that sets at least 72GB of memory, in this case increased to 100GB.
-The custom config below can then be provided to the pipeline via the [`-c`](#-c) parameter as highlighted in previous sections.
+To bypass this error you would need to find exactly which resources are set by the `STAR_ALIGN` process. The quickest way is to search for `process STAR_ALIGN` in the [nf-core/rnaseq Github repo](https://github.com/nf-core/rnaseq/search?q=process+STAR_ALIGN). We have standardised the structure of Nextflow DSL2 pipelines such that all module files will be present in the `modules/` directory and so based on the search results the file we want is `modules/nf-core/software/star/align/main.nf`. If you click on the link to that file you will notice that there is a `label` directive at the top of the module that is set to [`label process_high`](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/modules/nf-core/software/star/align/main.nf#L9). The [Nextflow `label`](https://www.nextflow.io/docs/latest/process.html#label) directive allows us to organise workflow processes in separate groups which can be referenced in a configuration file to select and configure subset of processes having similar computing requirements. The default values for the `process_high` label are set in the pipeline's [`base.config`](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/conf/base.config#L33-L37) which in this case is defined as 72GB. Providing you haven't set any other standard nf-core parameters to __cap__ the [maximum resources](https://nf-co.re/usage/configuration#max-resources) used by the pipeline then we can try and bypass the `STAR_ALIGN` process failure by creating a custom config file that sets at least 72GB of memory, in this case increased to 100GB. The custom config below can then be provided to the pipeline via the [`-c`](#-c) parameter as highlighted in previous sections.
 
 ```nextflow
 process {
-    withName: 'NFCORE_RNASEQ:RNASEQ:ALIGN_STAR:STAR_ALIGN' {
+    withName: STAR_ALIGN {
         memory = 100.GB
     }
 }
 ```
 
-> **NB:** We specify the full process name i.e. `NFCORE_RNASEQ:RNASEQ:ALIGN_STAR:STAR_ALIGN` in the config file because this takes priority over the short name (`STAR_ALIGN`) and allows existing configuration using the full process name to be correctly overridden.
->
-> If you get a warning suggesting that the process selector isn't recognised check that the process name has been specified correctly.
+> **NB:** We specify just the process name i.e. `STAR_ALIGN` in the config file and not the full task name string that is printed to screen in the error message or on the terminal whilst the pipeline is running i.e. `RNASEQ:ALIGN_STAR:STAR_ALIGN`. You may get a warning suggesting that the process selector isn't recognised but you can ignore that if the process name has been specified correctly. This is something that needs to be fixed upstream in core Nextflow.
 
 ### Updating containers
 
@@ -197,35 +325,35 @@ The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementatio
 2. Find the latest version of the Biocontainer available on [Quay.io](https://quay.io/repository/biocontainers/pangolin?tag=latest&tab=tags)
 3. Create the custom config accordingly:
 
-   - For Docker:
+    * For Docker:
 
-     ```nextflow
-     process {
-         withName: PANGOLIN {
-             container = 'quay.io/biocontainers/pangolin:3.0.5--pyhdfd78af_0'
-         }
-     }
-     ```
+        ```nextflow
+        process {
+            withName: PANGOLIN {
+                container = 'quay.io/biocontainers/pangolin:3.0.5--pyhdfd78af_0'
+            }
+        }
+        ```
 
-   - For Singularity:
+    * For Singularity:
 
-     ```nextflow
-     process {
-         withName: PANGOLIN {
-             container = 'https://depot.galaxyproject.org/singularity/pangolin:3.0.5--pyhdfd78af_0'
-         }
-     }
-     ```
+        ```nextflow
+        process {
+            withName: PANGOLIN {
+                container = 'https://depot.galaxyproject.org/singularity/pangolin:3.0.5--pyhdfd78af_0'
+            }
+        }
+        ```
 
-   - For Conda:
+    * For Conda:
 
-     ```nextflow
-     process {
-         withName: PANGOLIN {
-             conda = 'bioconda::pangolin=3.0.5'
-         }
-     }
-     ```
+        ```nextflow
+        process {
+            withName: PANGOLIN {
+                conda = 'bioconda::pangolin=3.0.5'
+            }
+        }
+        ```
 
 > **NB:** If you wish to periodically update individual tool-specific results (e.g. Pangolin) generated by the pipeline then you must ensure to keep the `work/` directory otherwise the `-resume` ability of the pipeline will be compromised and it will restart from scratch.
 
@@ -259,6 +387,6 @@ Some HPC setups also allow you to run nextflow within a cluster job submitted yo
 In some cases, the Nextflow Java virtual machines can start to request a large amount of memory.
 We recommend adding the following line to your environment to limit this (typically in `~/.bashrc` or `~./bash_profile`):
 
-```bash
+```console
 NXF_OPTS='-Xms1g -Xmx4g'
 ```

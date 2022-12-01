@@ -1,0 +1,2 @@
+sample,fastq_1,fastq_2,barcode_details
+mouse_AY60-6_50,mouse/test_data/AY60-6_50k_downsampled_mouse.fastq.gz,,mouse/barcode_details.json

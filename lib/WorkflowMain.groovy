@@ -1,5 +1,5 @@
 //
-// This file holds several functions specific to the main.nf workflow in the nf-core/callingcards pipeline
+// This file holds several functions specific to the main.nf workflow in the nf-core/callingcards-mammals pipeline
 //
 
 class WorkflowMain {

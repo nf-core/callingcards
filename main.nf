@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    nf-core/callingcards
+    nf-core/callingcards-mammals
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Github : https://github.com/nf-core/callingcards
 
@@ -34,13 +34,13 @@ WorkflowMain.initialise(workflow, params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { CALLINGCARDS } from './workflows/callingcards'
+include { CALLINGCARDS_MAMMALS } from './workflows/callingcards_mammals'
 
 //
-// WORKFLOW: Run main nf-core/callingcards analysis pipeline
+// WORKFLOW: Run main nf-core/callingcards-mammals analysis pipeline
 //
-workflow NFCORE_CALLINGCARDS {
-    CALLINGCARDS ()
+workflow NFCORE_CALLINGCARDS_MAMMALS {
+    CALLINGCARDS_MAMMALS ()
 }
 
 /*
@@ -54,7 +54,7 @@ workflow NFCORE_CALLINGCARDS {
 // See: https://github.com/nf-core/rnaseq/issues/619
 //
 workflow {
-    NFCORE_CALLINGCARDS ()
+    NFCORE_CALLINGCARDS_MAMMALS ()
 }
 
 /*

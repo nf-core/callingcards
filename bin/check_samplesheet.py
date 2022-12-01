@@ -8,6 +8,7 @@ import argparse
 import csv
 import logging
 import sys
+import os
 from collections import Counter
 from pathlib import Path
 
@@ -29,11 +30,16 @@ class RowChecker:
         ".fastq.gz",
     )
 
+    BARCODE_DETAILS_FORMAT = (
+        ".json"
+    )
+
     def __init__(
         self,
         sample_col="sample",
         first_col="fastq_1",
         second_col="fastq_2",
+        barcode_col = "barcode_details",
         single_col="single_end",
         **kwargs,
     ):
@@ -47,6 +53,7 @@ class RowChecker:
                 FASTQ file path (default "fastq_1").
             second_col (str): The name of the column that contains the second (if any)
                 FASTQ file path (default "fastq_2").
+            barcode_col (str): The name of the column that contains the barcode details json path
             single_col (str): The name of the new column that will be inserted and
                 records whether the sample contains single- or paired-end sequencing
                 reads (default "single_end").
@@ -56,6 +63,7 @@ class RowChecker:
         self._sample_col = sample_col
         self._first_col = first_col
         self._second_col = second_col
+        self._barcode_col = barcode_col
         self._single_col = single_col
         self._seen = set()
         self.modified = []
@@ -72,6 +80,7 @@ class RowChecker:
         self._validate_sample(row)
         self._validate_first(row)
         self._validate_second(row)
+        self._validate_barcode(row)
         self._validate_pair(row)
         self._seen.add((row[self._sample_col], row[self._first_col]))
         self.modified.append(row)
@@ -94,6 +103,11 @@ class RowChecker:
         if len(row[self._second_col]) > 0:
             self._validate_fastq_format(row[self._second_col])
 
+    def _validate_barcode(self, row):
+        if len(row[self._barcode_col]) <= 0:
+            raise AssertionError("Barcode details is required for each sample.")
+        self._validate_barcode_format(row[self._barcode_col])
+
     def _validate_pair(self, row):
         """Assert that read pairs have the same file extension. Report pair status."""
         if row[self._first_col] and row[self._second_col]:
@@ -113,6 +127,13 @@ class RowChecker:
                 f"It should be one of: {', '.join(self.VALID_FORMATS)}"
             )
 
+    def _validate_barcode_format(self,filename):
+        if not any(filename.endswith(extension) for extension in self.BARCODE_DETAILS_FORMAT):
+            raise AssertionError(
+                f"The barcode_details file has an unrecognized extension: {filename}\n"
+                f"It should be one of: {', '.join(self.BARCODE_DETAILS_FORMAT)}"
+            )
+
     def validate_unique_samples(self):
         """
         Assert that the combination of sample name and FASTQ filename is unique.
@@ -128,7 +149,6 @@ class RowChecker:
             sample = row[self._sample_col]
             seen[sample] += 1
             row[self._sample_col] = f"{sample}_T{seen[sample]}"
-
 
 def read_head(handle, num_lines=10):
     """Read the specified number of lines from the current position in the file."""

@@ -1,16 +1,77 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/callingcards/master/nextflow_schema.json",
-    "title": "nf-core/callingcards pipeline parameters",
-    "description": "A pipeline for processing calling cards data",
+    "$id": "https://raw.githubusercontent.com/nf-core/callingcards-mammals/master/nextflow_schema.json",
+    "title": "nf-core/callingcards-mammals pipeline parameters",
+    "description": "An automated processing pipeline for mammalian bulk calling cards experiments",
     "type": "object",
     "definitions": {
+        "hops_counting_options": {
+            "title": "Hops counting options",
+            "type": "object",
+            "description": "Hops quantification related parameters",
+            "default": "",
+            "properties": {
+                "min_mapq": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Values with less than or equal to this mapq value will not be counted as transpositions. Defaults to 10"
+                }
+            }
+        },
+        "read_processing_options": {
+            "title": "Read processing options",
+            "type": "object",
+            "description": "Options to control how reads are processed prior to alignment",
+            "default": "",
+            "properties": {
+                "r1_bc_pattern": {
+                    "type": "string",
+                    "default": "None",
+                    "description": "UMITools compliant read 1 barcode pattern. See UMITools documentation"
+                },
+                "r2_bc_pattern": {
+                    "type": "string",
+                    "default": "None",
+                    "description": "UMITools compliant read 2 barcode pattern. See UMITools documentation"
+                },
+                "reduce_to_se": {
+                    "type": "boolean",
+                    "description": "Once barcodes are extracted, treat reads as single end from alignment step forward. Defaults to false"
+                },
+                "r1_crop": {
+                    "type": "integer",
+                    "description": "If SE or reduce_to_se is True, this option allows the user to crop the R1 read. This occurs after trimming"
+                }
+            }
+        },
+        "alignment_options": {
+            "title": "Alignment options",
+            "type": "object",
+            "description": "Alignment parameters",
+            "default": "",
+            "properties": {
+                "aligner": {
+                    "type": "string",
+                    "default": "bwamem2",
+                    "description": "Choose one of the configured aligners. Defaults to bwamem2.",
+                    "enum": [
+                        "bwamem2",
+                        "bwaaln",
+                        "bowtie2",
+                        "bowtie"
+                    ]
+                }
+            }
+        },
         "input_output_options": {
             "title": "Input/output options",
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["input", "outdir"],
+            "required": [
+                "input",
+                "outdir"
+            ],
             "properties": {
                 "input": {
                     "type": "string",
@@ -19,7 +80,7 @@
                     "pattern": "^\\S+\\.csv$",
                     "schema": "assets/schema_input.json",
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/callingcards/usage#samplesheet-input).",
+                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/callingcards-mammals/usage#samplesheet-input).",
                     "fa_icon": "fas fa-file-csv"
                 },
                 "outdir": {
@@ -27,6 +88,10 @@
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
                     "fa_icon": "fas fa-folder-open"
+                },
+                "save_intermediate": {
+                    "type": "boolean",
+                    "description": "Set this to True to save intermediate files, eg an unsorted bam file prior to a samtools sort step. Defaults to False"
                 },
                 "email": {
                     "type": "string",
@@ -62,6 +127,32 @@
                     "description": "Path to FASTA genome file.",
                     "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
                     "fa_icon": "far fa-file-code"
+                },
+                "fasta_index": {
+                    "type": "string",
+                    "description": "path to the .fai index file produced by samtools faidx from the fasta file",
+                    "pattern": ".fai$",
+                    "format": "file-path"
+                },
+                "bwamem2_index": {
+                    "type": "string",
+                    "default": "None",
+                    "description": "path to the bwamem2 index. only used if aligner is bwamem2. if the aligner is bwamem2 and this is not provided, the index is created in the pipeline"
+                },
+                "bwa_aln_index": {
+                    "type": "string",
+                    "default": "None",
+                    "description": "path to the bwaaln index. only used if aligner is bwaaln. if the aligner is bwaaln and this is not provided, the index is created in the pipeline"
+                },
+                "bowtie2_index": {
+                    "type": "string",
+                    "default": "None",
+                    "description": "path to the bowtie2 index. only used if aligner is bowtie2. if the aligner is bowtie2 and this is not provided, the index is created in the pipeline"
+                },
+                "bowtie_index": {
+                    "type": "string",
+                    "default": "None",
+                    "description": "path to the bowtie index. only used if aligner is bowtie. if the aligner is bowtie and this is not provided, the index is created in the pipeline"
                 },
                 "igenomes_base": {
                     "type": "string",
@@ -182,7 +273,14 @@
                     "description": "Method used to save pipeline results to output directory.",
                     "help_text": "The Nextflow `publishDir` option specifies which intermediate files should be saved to the output directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details.",
                     "fa_icon": "fas fa-copy",
-                    "enum": ["symlink", "rellink", "link", "copy", "copyNoFollow", "move"],
+                    "enum": [
+                        "symlink",
+                        "rellink",
+                        "link",
+                        "copy",
+                        "copyNoFollow",
+                        "move"
+                    ],
                     "hidden": true
                 },
                 "email_on_fail": {
@@ -268,6 +366,15 @@
         }
     },
     "allOf": [
+        {
+            "$ref": "#/definitions/hops_counting_options"
+        },
+        {
+            "$ref": "#/definitions/read_processing_options"
+        },
+        {
+            "$ref": "#/definitions/alignment_options"
+        },
         {
             "$ref": "#/definitions/input_output_options"
         },
