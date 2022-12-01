@@ -4,7 +4,8 @@
     nf-core/callingcards
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Github : https://github.com/nf-core/callingcards
-Website: https://nf-co.re/callingcards
+
+    Website: https://nf-co.re/callingcards
     Slack  : https://nfcore.slack.com/channels/callingcards
 ----------------------------------------------------------------------------------------
 */
