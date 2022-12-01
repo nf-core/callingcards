@@ -54,7 +54,7 @@ Specific instructions for running this on [HTCF are provided here](docs/htcf_spe
 
    $ cd calling_card_output
 
-   $ git clone https://github.com/cmatKhan/callingcards-mammals.git
+   $ git clone https://github.com/cmatKhan/nf-callingcards.git
 
    # you can replace singularity below with any one of the dependency managers
    # There are also other test profiles -- see usage for more detail
