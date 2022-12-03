@@ -3,7 +3,7 @@
 [![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/callingcards/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A521.10.3-23aa62.svg)](https://www.nextflow.io/)
-[![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
+<!--[![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)-->
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
 [![Launch on Nextflow Tower](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Nextflow%20Tower-%234256e7)](https://tower.nf/launch?pipeline=https://github.com/nf-core/callingcards)
@@ -14,11 +14,11 @@
 
 <!-- TODO nf-core: Write a 1-2 sentence summary of what data the pipeline is for and what it does -->
 
-**nf-core/callingcards** is a bioinformatics best-practice analysis pipeline for An automated processing pipeline for mammalian bulk calling cards experiments.
+**nf-core/callingcards** is a bioinformatics best-practice analysis pipeline for bulk calling cards experiments. Currently,
+The pipeline is configured for bulk sequencing mammalian samples. A workflow for bulk yeast samples, and single cell samples,
+are in development.
 
-The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It uses Docker/Singularity containers making installation trivial and results highly reproducible. The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process which makes it much easier to maintain and update software dependencies. Where possible, these processes have been submitted to and installed from [nf-core/modules](https://github.com/nf-core/modules) in order to make them available to all nf-core pipelines, and to everyone within the Nextflow community!
-
-The testing data is currently provided in the `assets` directory of the pipeline code repository. Instructions on running the tests area available in Usage.
+The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It uses Docker/Singularity containers which makes installation trivial and results reproducible. The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process which simplifies maintenance and software updates. Where possible, these processes have been submitted to and installed from [nf-core/modules](https://github.com/nf-core/modules) in order to make them available to all nf-core pipelines, and to everyone within the Nextflow community.
 
 On release, automated continuous integration tests run the pipeline on a full-sized dataset on the AWS cloud infrastructure. This ensures that the pipeline runs on AWS, has sensible resource allocation defaults set to run on real-world datasets, and permits the persistent storage of results to benchmark between pipeline releases and other analysis sources. The results obtained from the full-sized test can be viewed on the [nf-core website](https://nf-co.re/callingcards/results).
 
@@ -33,21 +33,23 @@ On release, automated continuous integration tests run the pipeline on a full-si
 1. Alignment
     1. One of: [`bwamem2`](https://github.com/bwa-mem2/bwa-mem2),[`bwa`](https://bio-bwa.sourceforge.net/bwa.shtml),[`bowtie2`](https://bowtie-bio.sourceforge.net/bowtie2/index.shtml),[`bowtie`](https://bowtie-bio.sourceforge.net/index.shtml)
 1. Process Alignments
-    1. Extract alignment QC metrics ([`Samtools`](https://www.htslib.org/), [`preseq`](http://smithlabresearch.org/software/preseq/))
-    1. Add Read Group and tags to alignment files ([custom script](https://github.com/cmatKhan/pycallingcards/tree/raw_processing/pycallingcards/raw_processing))
-    1. Quantify transposon hops ([custom script](https://github.com/cmatKhan/pycallingcards/tree/raw_processing/pycallingcards/raw_processing))
+    1. Extract alignment QC metrics ([`Samtools`](https://www.htslib.org/)
+    1. Quantify transposon hops and perform calling cards specific QC ([pycallingcards](https://github.com/cmatKhan/pycallingcards/tree/raw_processing/pycallingcards/raw_processing))
+    1. Peak calling and significance statistics ([pycallingcards](https://github.com/cmatKhan/pycallingcards/tree/raw_processing/pycallingcards/raw_processing))
 1. Present QC for raw read and alignment metrics ([`MultiQC`](http://multiqc.info/))
 
 ## Quick Start
 
 Note that more detailed instructions are available in [usage](docs/usage.md).
-Specific instructions for running this on [HTCF are provided here](docs/htcf_specific.md)
+<!-- Specific instructions for running this on [HTCF are provided here](docs/htcf_specific.md) -->
 
 1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=21.10.3`)
 
-1. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) (you can follow [this tutorial](https://singularity-tutorial.github.io/01-installation/)), [`Podman`](https://podman.io/), [`Shifter`](https://nersc.gitlab.io/development/shifter/how-to-use/) or [`Charliecloud`](https://hpc.github.io/charliecloud/) for full pipeline reproducibility _(you can use [`Conda`](https://conda.io/miniconda.html) both to install Nextflow itself and also to manage software within pipelines. Please only use it within pipelines as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_.
+1. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) (you can follow [this tutorial](https://singularity-tutorial.github.io/01-installation/)), [`Podman`](https://podman.io/), [`Shifter`](https://nersc.gitlab.io/development/shifter/how-to-use/) or [`Charliecloud`](https://hpc.github.io/charliecloud/) for full pipeline reproducibility.
 
-1. Git clone the repo and test it on a minimal data set designed to confirm that the pipeline will complete
+<!-- _(you can use [`Conda`](https://conda.io/miniconda.html) both to install Nextflow itself and also to manage software within pipelines. Please only use it within pipelines as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_. -->
+
+1. Testing with a minimal data set. This tests the installation only.
 
    ```bash
    $ mkdir calling_card_output
@@ -61,7 +63,9 @@ Specific instructions for running this on [HTCF are provided here](docs/htcf_spe
    $ nextflow run callingcards/main.nf -profile test_human,singularity
    ```
 
-   Note that some form of configuration will be needed so that Nextflow knows how to fetch the required software. This is usually done in the form of a config profile (`test_yeast` and `singularity` in the example command above). You can chain multiple config profiles in a comma-separated string, as demonstrated.
+   Note that some form of configuration will be needed so that Nextflow knows how to fetch the required software. This is usually done in the form of a config profile (`test_human` and `singularity` in the example command above). You can chain multiple config profiles in a comma-separated string, as demonstrated.
+
+   **Note**: this pipeline is not currently configured to run with conda.
 
    > - The pipeline comes with config profiles called `docker`, `singularity`, `podman`, `shifter`, `charliecloud` and `conda` which instruct the pipeline to use the named tool for software management. For example, `-profile test,docker`.
    > - Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
@@ -88,9 +92,9 @@ The nf-core/callingcards pipeline comes with documentation about the pipeline [u
 
 ## Credits
 
-nf-core/callingcards was written by Chase Mateusiak. It was adapted from scripts written by: __fill this in__
+nf-core/callingcards is implemented in nextflow by Chase Mateusiak. It was adapted from scripts written by: **fill this in**
 
-We thank the following people for their extensive assistance in the development of this pipeline: __fill this in__
+We thank the following people for their extensive assistance in the development of this pipeline: **fill this in**
 
 ## Contributions and Support
 
@@ -102,8 +106,6 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 
 <!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
 <!-- If you use  nf-core/callingcards for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
-
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 
