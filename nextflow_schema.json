@@ -2,7 +2,7 @@
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/callingcards/master/nextflow_schema.json",
     "title": "nf-core/callingcards pipeline parameters",
-    "description": "A pipeline for processing calling cards data",
+    "description": "An automated processing pipeline for mammalian bulk calling cards experiments",
     "type": "object",
     "definitions": {
         "input_output_options": {
