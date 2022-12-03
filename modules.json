@@ -7,7 +7,7 @@
                 "nf-core": {
                     "bowtie/align": {
                         "branch": "master",
-                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905"
+                        "git_sha": "653588be2a4aadab487b530643dbc9baf7a485c4"
                     },
                     "bowtie/build": {
                         "branch": "master",
@@ -15,7 +15,7 @@
                     },
                     "bowtie2/align": {
                         "branch": "master",
-                        "git_sha": "cf5b9c30a2adacc581793afb79fae5f5b50bed01"
+                        "git_sha": "1a96d72a3a5079424bc9a9ac5c2ca72902af327f"
                     },
                     "bowtie2/build": {
                         "branch": "master",
@@ -23,7 +23,7 @@
                     },
                     "bwa/aln": {
                         "branch": "master",
-                        "git_sha": "277f4d693a00471690b66598d167bbca78bbe232"
+                        "git_sha": "653588be2a4aadab487b530643dbc9baf7a485c4"
                     },
                     "bwa/index": {
                         "branch": "master",
@@ -31,11 +31,11 @@
                     },
                     "bwa/sampe": {
                         "branch": "master",
-                        "git_sha": "cf5b9c30a2adacc581793afb79fae5f5b50bed01"
+                        "git_sha": "653588be2a4aadab487b530643dbc9baf7a485c4"
                     },
                     "bwa/samse": {
                         "branch": "master",
-                        "git_sha": "cf5b9c30a2adacc581793afb79fae5f5b50bed01"
+                        "git_sha": "653588be2a4aadab487b530643dbc9baf7a485c4"
                     },
                     "bwamem2/index": {
                         "branch": "master",
@@ -43,7 +43,7 @@
                     },
                     "bwamem2/mem": {
                         "branch": "master",
-                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905"
+                        "git_sha": "653588be2a4aadab487b530643dbc9baf7a485c4"
                     },
                     "custom/dumpsoftwareversions": {
                         "branch": "master",
@@ -51,7 +51,7 @@
                     },
                     "fastqc": {
                         "branch": "master",
-                        "git_sha": "f6a11408536fbee6cbea1f5977605011873de3ca"
+                        "git_sha": "810e8f2603ec38401d49a4aaed06f6d058745552"
                     },
                     "multiqc": {
                         "branch": "master",
@@ -59,7 +59,7 @@
                     },
                     "picard/collectmultiplemetrics": {
                         "branch": "master",
-                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905"
+                        "git_sha": "f24b0232ef276882e61edbacd4e3f2f687031ef2"
                     },
                     "preseq/ccurve": {
                         "branch": "master",
@@ -67,19 +67,19 @@
                     },
                     "samtools/faidx": {
                         "branch": "master",
-                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905"
+                        "git_sha": "cf5b9c30a2adacc581793afb79fae5f5b50bed01"
                     },
                     "samtools/flagstat": {
                         "branch": "master",
-                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905"
+                        "git_sha": "cf5b9c30a2adacc581793afb79fae5f5b50bed01"
                     },
                     "samtools/idxstats": {
                         "branch": "master",
-                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905"
+                        "git_sha": "cf5b9c30a2adacc581793afb79fae5f5b50bed01"
                     },
                     "samtools/index": {
                         "branch": "master",
-                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905"
+                        "git_sha": "cf5b9c30a2adacc581793afb79fae5f5b50bed01"
                     },
                     "samtools/sort": {
                         "branch": "master",
@@ -87,7 +87,7 @@
                     },
                     "samtools/stats": {
                         "branch": "master",
-                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905"
+                        "git_sha": "cf5b9c30a2adacc581793afb79fae5f5b50bed01"
                     },
                     "trimmomatic": {
                         "branch": "master",
