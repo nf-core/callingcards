@@ -1,4 +1,4 @@
-process PARSEBAM {
+process HOPS_MAMMALS {
     tag "$meta.id"
     label "process_single"
 
@@ -13,7 +13,7 @@ process PARSEBAM {
 
     output:
     tuple val(meta), path("*qbed")       , emit: qbed
-    tuple val(meta), path("*tsv")         , emit: bc_qc
+    tuple val(meta), path("*tsv")        , emit: bc_qc
     tuple val(meta), path("*passing.bam"), emit: passing_bam
     tuple val(meta), path('*failing.bam'), emit: failing_bam
     path "versions.yml"                  , emit: versions

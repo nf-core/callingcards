@@ -128,6 +128,10 @@
                     "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
                     "fa_icon": "far fa-file-code"
                 },
+                "gtf": {
+                    "type": "string",
+                    "default": null
+                },
                 "fasta_index": {
                     "type": "string",
                     "description": "path to the .fai index file produced by samtools faidx from the fasta file",
@@ -169,7 +173,11 @@
                     "hidden": true,
                     "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
                 }
-            }
+            },
+            "required": [
+                "gtf",
+                "fasta"
+            ]
         },
         "institutional_config_options": {
             "title": "Institutional config options",

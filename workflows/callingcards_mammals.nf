@@ -31,6 +31,9 @@ ch_multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.mu
 ch_multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
 ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
+// CITE: nf-core/rnaseq
+ch_biotypes_header_multiqc = file("$projectDir/assets/multiqc/biotypes_header.txt", checkIfExists: true)
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT LOCAL MODULES/SUBWORKFLOWS
@@ -82,6 +85,8 @@ workflow CALLINGCARDS_MAMMALS {
             Channel.fromPath(params.fasta).collect():
             Channel.empty()
 
+    ch_gtf = Channel.fromPath(params.gtf).collect()
+
     //
     // SUBWORKFLOW_1: Read in samplesheet, validate and stage input files
     //
@@ -131,7 +136,9 @@ workflow CALLINGCARDS_MAMMALS {
     PROCESS_ALIGNMENTS (
         ch_aln_with_details,
         fasta,
-        PREPARE_GENOME.out.fai
+        PREPARE_GENOME.out.fai,
+        ch_gtf,
+        ch_biotypes_header_multiqc
     )
     ch_versions          = ch_versions.mix(PROCESS_ALIGNMENTS.out.versions)
 
@@ -160,7 +167,9 @@ workflow CALLINGCARDS_MAMMALS {
     ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.samtools_flagstat.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.samtools_idxstats.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.picard_qc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.preseq_ccurve.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.featurecounts_multiqc.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.featurecounts_summary.collect{it[1]}.ifEmpty([]))
+
     // Run module
     MULTIQC (
         ch_multiqc_files.collect(),
