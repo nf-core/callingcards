@@ -5,7 +5,7 @@ include { SAMTOOLS_BAM_STATS            } from "${projectDir}/subworkflows/samto
 include { PICARD_COLLECTMULTIPLEMETRICS } from "${projectDir}/modules/nf-core/picard/collectmultiplemetrics/main"
 include { HOPS_MAMMALS                  } from "${projectDir}/modules/local/hops_mammals/main"
 include { SUBREAD_FEATURECOUNTS         } from "${projectDir}/modules/nf-core/subread/featurecounts/main"
-include { MULTIQC_CUSTOM_BIOTYPE        } from "${projectDir}/modules/nf_core_other_pipeline_modules/multiqc_biotypes_qc/main.nf"
+include { MULTIQC_CUSTOM_BIOTYPE        } from "${projectDir}/modules/local/multiqc_custom_biotype/main"
 include { SAMTOOLS_INDEX                } from "${projectDir}/modules/nf-core/samtools/index/main"
 
 workflow PROCESS_ALIGNMENTS {

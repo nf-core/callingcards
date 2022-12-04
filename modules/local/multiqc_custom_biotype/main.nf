@@ -1,4 +1,5 @@
 process MULTIQC_CUSTOM_BIOTYPE {
+    // CITE: nf-core/rnaseq
     tag "$meta.id"
 
     conda (params.enable_conda ? "conda-forge::python=3.9.5" : null)
