@@ -29,9 +29,9 @@ workflow PROCESS_ALIGNMENTS {
     ch_versions = ch_versions.mix(SAMTOOLS_BAM_STATS.out.versions)
 
     PICARD_COLLECTMULTIPLEMETRICS(
-        bam_bai.map{meta,bam,bai -> [meta,bam]},
-        fasta,
-        fai.map{meta,fai -> fai}
+        bam_bai,
+        fasta.map{it -> ['',it]},
+        fai
     )
     ch_versions = ch_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.versions)
 
