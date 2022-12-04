@@ -12,8 +12,6 @@
 
 ## Introduction
 
-<!-- TODO nf-core: Write a 1-2 sentence summary of what data the pipeline is for and what it does -->
-
 **nf-core/callingcards** is a bioinformatics best-practice analysis pipeline for bulk calling cards experiments. Currently,
 The pipeline is configured for bulk sequencing mammalian samples. A workflow for bulk yeast samples, and single cell samples,
 are in development.
