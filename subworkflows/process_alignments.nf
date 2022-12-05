@@ -55,10 +55,11 @@ workflow PROCESS_ALIGNMENTS {
     ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
 
     aln
-        .map{ meta,bam,bai,barcode_details -> [meta,bam]}
-        .concat( ch_gtf )
-        .collect()
-        .set{ ch_featurecounts_input }
+    .map{ meta,bam,bai,barcode -> [meta,bam] }
+    .combine(ch_gtf)
+    .set{ ch_featurecounts_input }
+
+    ch_featurecounts_input.view()
 
     // TODO add strandedness to input sheet
     SUBREAD_FEATURECOUNTS (
