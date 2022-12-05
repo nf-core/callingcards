@@ -90,9 +90,13 @@ The nf-core/callingcards pipeline comes with documentation about the pipeline [u
 
 ## Credits
 
-nf-core/callingcards is implemented in nextflow by Chase Mateusiak. It was adapted from scripts written by: **fill this in**
+nf-core/callingcards is implemented in nextflow by [Chase Mateusiak](https://orcid.org/0000-0002-2890-4242). It was adapted from scripts written by:
+- [Rob Mitra](https://orcid.org/0000-0002-2680-4264)
+- [Juanru Guo](https://orcid.org/0000-0001-8948-9700)
 
-We thank the following people for their extensive assistance in the development of this pipeline: **fill this in**
+We thank the following people for their extensive assistance in the development of this pipeline:
+- [Joseph Dougherty](https://orcid.org/0000-0002-6385-3997)
+- [Allen Yen](https://orcid.org/0000-0002-3984-541X)
 
 ## Contributions and Support
 

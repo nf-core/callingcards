@@ -59,8 +59,6 @@ workflow PROCESS_ALIGNMENTS {
     .combine(ch_gtf)
     .set{ ch_featurecounts_input }
 
-    ch_featurecounts_input.view()
-
     // TODO add strandedness to input sheet
     SUBREAD_FEATURECOUNTS (
         ch_featurecounts_input
