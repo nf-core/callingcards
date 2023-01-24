@@ -179,6 +179,14 @@ workflow CALLINGCARDS_MAMMALS {
     ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.picard_qc.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.featurecounts_multiqc.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.featurecounts_summary.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_bamstat.collect{it[1]}.ifEmpty([]))
+	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_inferexperiment.collect{it[1]}.ifEmpty([]))
+	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_innerdistance.collect{it[1]}.ifEmpty([]))
+	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_junctionannotation.collect{it[1]}.ifEmpty([]))
+	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_junctionsaturation.collect{it[1]}.ifEmpty([]))
+	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_readdistribution.collect{it[1]}.ifEmpty([]))
+	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_readduplication.collect{it[1]}.ifEmpty([]))
+	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_tin.collect{it[1]}.ifEmpty([]))
 
     // Run module
     MULTIQC (

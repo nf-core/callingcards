@@ -67,6 +67,8 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [Alignment](#alignment) - Align pre-processed reads with one of several aligners
 - [Process Alignments](#process-alignments)
     - [Samtools Alignment QC Metrics](#samtools) - bam indexing and extract alignment level QC metrics
+    - [picard](#picard) - additional QC metrics
+    - [subread featurecounts](#featurecounts) - Provides an overview of
     - [Counting Hops](#pycallingcards) - Iterate over alignments and count qualifiying reads
 - [MultiQC](#multiqc) - Collect and display logs and reports
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution

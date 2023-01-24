@@ -4,8 +4,6 @@
 include { BAM_STATS_SAMTOOLS            } from "${projectDir}/subworkflows/nf-core/bam_stats_samtools/main"
 include { PICARD_COLLECTMULTIPLEMETRICS } from "${projectDir}/modules/nf-core/picard/collectmultiplemetrics/main"
 include { BAM_RSEQC                     } from "${projectDir}/subworkflows/nf-core/bam_rseqc/main"
-include { SUBREAD_FEATURECOUNTS         } from "${projectDir}/modules/nf-core/subread/featurecounts/main"
-include { MULTIQC_CUSTOM_BIOTYPE        } from "${projectDir}/modules/local/multiqc_custom_biotype/main"
 include { HOPS_MAMMALS                  } from "${projectDir}/modules/local/hops_mammals/main"
 include { SAMTOOLS_INDEX                } from "${projectDir}/modules/nf-core/samtools/index/main"
 
@@ -69,25 +67,18 @@ workflow PROCESS_ALIGNMENTS {
     .combine(ch_gtf)
     .set{ ch_featurecounts_input }
 
-    // TODO add strandedness to input sheet
-    SUBREAD_FEATURECOUNTS (
-        ch_featurecounts_input
-    )
-    ch_versions = ch_versions.mix(SUBREAD_FEATURECOUNTS.out.versions)
-
-    // CITE: nf-core/rnaseq
-    MULTIQC_CUSTOM_BIOTYPE (
-        SUBREAD_FEATURECOUNTS.out.counts,
-        biotypes_header_multiqc
-    )
-    ch_versions = ch_versions.mix(MULTIQC_CUSTOM_BIOTYPE.out.versions)
-
     emit:
     samtools_stats = BAM_STATS_SAMTOOLS.out.stats
     samtools_flagstat = BAM_STATS_SAMTOOLS.out.flagstat
     samtools_idxstats = BAM_STATS_SAMTOOLS.out.idxstats
     picard_qc = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
-    featurecounts_multiqc = MULTIQC_CUSTOM_BIOTYPE.out.tsv
-    featurecounts_summary = SUBREAD_FEATURECOUNTS.out.summary
+    rseqc_bamstat            = BAM_RSEQC.out.bamstat_txt
+    rseqc_inferexperiment    = BAM_RSEQC.out.inferexperiment_txt
+    rseqc_innerdistance      = BAM_RSEQC.out.innerdistance_freq
+    rseqc_junctionannotation = BAM_RSEQC.out.junctionannotation_log
+    rseqc_junctionsaturation = BAM_RSEQC.out.junctionsaturation_rscript
+    rseqc_readdistribution   = BAM_RSEQC.out.readdistribution_txt
+    rseqc_readduplication    = BAM_RSEQC.out.readduplication_pos_xls
+    rseqc_tin                = BAM_RSEQC.out.tin_txt
     versions = ch_versions
 }
