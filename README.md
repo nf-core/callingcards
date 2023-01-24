@@ -31,7 +31,7 @@ On release, automated continuous integration tests run the pipeline on a full-si
 1. Alignment
     1. One of: [`bwamem2`](https://github.com/bwa-mem2/bwa-mem2),[`bwa`](https://bio-bwa.sourceforge.net/bwa.shtml),[`bowtie2`](https://bowtie-bio.sourceforge.net/bowtie2/index.shtml),[`bowtie`](https://bowtie-bio.sourceforge.net/index.shtml)
 1. Process Alignments
-    1. Extract alignment QC metrics ([`Samtools`](https://www.htslib.org/)
+    1. Extract alignment QC metrics ([`Samtools`](https://www.htslib.org/, [Picard](https://gatk.broadinstitute.org/hc/en-us/articles/360037594031-CollectMultipleMetrics-Picard-), [RSeQC](https://rseqc.sourceforge.net/))
     1. Quantify transposon hops and perform calling cards specific QC ([pycallingcards](https://github.com/cmatKhan/pycallingcards/tree/raw_processing/pycallingcards/raw_processing))
     1. Peak calling and significance statistics ([pycallingcards](https://github.com/cmatKhan/pycallingcards/tree/raw_processing/pycallingcards/raw_processing))
 1. Present QC for raw read and alignment metrics ([`MultiQC`](http://multiqc.info/))
