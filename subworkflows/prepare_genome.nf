@@ -5,12 +5,14 @@
 include { BWAMEM2_INDEX  } from  "${projectDir}/modules/nf-core/bwamem2/index/main"
 include { BWA_INDEX      } from  "${projectDir}/modules/nf-core/bwa/index/main"
 include { BOWTIE2_BUILD  } from  "${projectDir}/modules/nf-core/bowtie2/build/main"
-include { BOWTIE_BUILD  } from  "${projectDir}/modules/nf-core/bowtie/build/main"
+include { BOWTIE_BUILD   } from  "${projectDir}/modules/nf-core/bowtie/build/main"
+include { GTF2BED        } from "${projectDir}/modules/local/gtf2bed"
 include { SAMTOOLS_FAIDX } from "${projectDir}/modules/nf-core/samtools/faidx/main"
 
 workflow PREPARE_GENOME {
     take:
     fasta   // path(genome)
+    gtf
 
     main:
 

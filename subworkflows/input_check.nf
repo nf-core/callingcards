@@ -34,9 +34,10 @@ def create_fastq_channel(LinkedHashMap row) {
 
     // this is done to make the test profiles work. test data are in the
     // projectDir currently
-    def fastq_1 = file(row.fastq_1).exists() ?
-                    row.fastq_1 :
-                    "${projectDir}/${row.fastq_1}"
+    // def fastq_1 = file(row.fastq_1).exists() ?
+    //                 row.fastq_1 :
+    //                 "${projectDir}/${row.fastq_1}"
+    fastq_1 = row.fastq_1
 
     // add path(s) of the fastq file(s) to the meta map
     def fastq_meta = []
@@ -48,9 +49,10 @@ def create_fastq_channel(LinkedHashMap row) {
     } else {
     // this is done to make the test profiles work. test data are in the
     // projectDir currently
-        def fastq_2 = file(row.fastq_2).exists() ?
-                row.fastq_2 :
-                "${projectDir}/${row.fastq_2}"
+        // def fastq_2 = file(row.fastq_2).exists() ?
+        //         row.fastq_2 :
+        //         "${projectDir}/${row.fastq_2}"
+        fastq_2 = row.fastq_2
 
         if (!file(fastq_2).exists()) {
             exit 1, "ERROR: Please check input samplesheet -> Read 2 FastQ file does not exist!\n${fastq_2}"
@@ -70,9 +72,10 @@ def create_barcode_details_channel(LinkedHashMap row,reduce_to_se) {
 
     // this is done to make the test profiles work. test data are in the
     // projectDir currently
-    def barcode_details = file(row.barcode_details).exists() ?
-                    row.barcode_details :
-                    "${projectDir}/${row.barcode_details}"
+    // def barcode_details = file(row.barcode_details).exists() ?
+    //                 row.barcode_details :
+    //                 "${projectDir}/${row.barcode_details}"
+    barcode_details = row.barcode_details
 
     // add path(s) of the fastq file(s) to the meta map
     def barcode_details_meta = []

@@ -102,7 +102,8 @@ workflow CALLINGCARDS_MAMMALS {
     //
     // if the user does not provide an genome index, index it
     PREPARE_GENOME(
-        fasta
+        fasta,
+        ch_gtf
     )
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
 

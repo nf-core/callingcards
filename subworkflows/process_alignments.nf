@@ -1,11 +1,12 @@
 //
 // Check input samplesheet and get read channels
 //
-include { SAMTOOLS_BAM_STATS            } from "${projectDir}/subworkflows/samtools_bam_stats"
+include { BAM_STATS_SAMTOOLS            } from "${projectDir}/subworkflows/nf-core/bam_stats_samtools/main"
 include { PICARD_COLLECTMULTIPLEMETRICS } from "${projectDir}/modules/nf-core/picard/collectmultiplemetrics/main"
-include { HOPS_MAMMALS                  } from "${projectDir}/modules/local/hops_mammals/main"
+include { BAM_RSEQC                     } from "${projectDir}/subworkflows/nf-core/bam_rseqc/main"
 include { SUBREAD_FEATURECOUNTS         } from "${projectDir}/modules/nf-core/subread/featurecounts/main"
 include { MULTIQC_CUSTOM_BIOTYPE        } from "${projectDir}/modules/local/multiqc_custom_biotype/main"
+include { HOPS_MAMMALS                  } from "${projectDir}/modules/local/hops_mammals/main"
 include { SAMTOOLS_INDEX                } from "${projectDir}/modules/nf-core/samtools/index/main"
 
 workflow PROCESS_ALIGNMENTS {
@@ -26,7 +27,7 @@ workflow PROCESS_ALIGNMENTS {
       .map{meta,bam,bai,barcode_details -> [meta,bam,bai] }
       .set{ bam_bai }
 
-    SAMTOOLS_BAM_STATS(
+    BAM_STATS_SAMTOOLS(
         bam_bai
     )
     ch_versions = ch_versions.mix(SAMTOOLS_BAM_STATS.out.versions)
@@ -37,6 +38,12 @@ workflow PROCESS_ALIGNMENTS {
         fai
     )
     ch_versions = ch_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.versions)
+
+    BAM_RSEQC(
+        bam_bai,
+        ch_genome_bed,
+        rseqc_modules
+    )
 
     HOPS_MAMMALS (
         aln,
