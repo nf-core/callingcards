@@ -56,7 +56,7 @@ Note that more detailed instructions are available in [usage](docs/usage.md).
 
    # you can replace singularity below with any one of the dependency managers
    # There are also other test profiles -- see usage for more detail
-   $ nextflow run callingcards/main.nf -profile test_human,singularity
+   $ nextflow run callingcards -profile test,singularity
    ```
 
    Note that some form of configuration will be needed so that Nextflow knows how to fetch the required software. This is usually done in the form of a config profile (`test_human` and `singularity` in the example command above). You can chain multiple config profiles in a comma-separated string, as demonstrated.
