@@ -39,7 +39,6 @@ On release, automated continuous integration tests run the pipeline on a full-si
 ## Quick Start
 
 Note that more detailed instructions are available in [usage](docs/usage.md).
-<!-- Specific instructions for running this on [HTCF are provided here](docs/htcf_specific.md) -->
 1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=22.10.1`)
 
 1. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) (you can follow [this tutorial](https://singularity-tutorial.github.io/01-installation/)), [`Podman`](https://podman.io/), [`Shifter`](https://nersc.gitlab.io/development/shifter/how-to-use/) or [`Charliecloud`](https://hpc.github.io/charliecloud/) for full pipeline reproducibility.

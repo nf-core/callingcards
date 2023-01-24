@@ -138,10 +138,6 @@ you will only ever need to change the `tf_map` component.
 
 ## Running the pipeline
 
-__*HTCF USERS*__: use the additional profile `htcf` in the `-profile` line.
-Your profile line should look like this for mammals, for instance:
-`default_mammal,htcf,singularity`
-
 The typical command for running the pipeline is as follows:
 
 ```
@@ -243,16 +239,9 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
     * A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
 * `conda`
     * A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter or Charliecloud.
-* `htcf`
-    * A SLURM profile with reasonable parameters for the HTCF cluster
-* `default_yeast`
-    * A profile with suggested configuration for yeast data
 * `default_mammals`
     * A profile with suggested configuration for human and mouse data
-* `test_yeast`
-    * A profile with a complete configuration for yeast data for automated testing
-    * Includes links to test data -- no other parameters necessary
-* `test_human`
+* `test`
     * A profile with a complete configuration for human data for automated testing
     * Mouse data would run through the same steps, hence `default_mammals` is
       appropriate for both human and mouse
