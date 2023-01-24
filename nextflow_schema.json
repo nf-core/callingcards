@@ -18,6 +18,28 @@
                 }
             }
         },
+        "qc_settings": {
+            "title": "QC settings",
+            "type": "object",
+            "description": "Quality Control metric related parameters",
+            "default": "",
+            "properties": {
+                "rseqc_modules": {
+                    "type": "string",
+                    "default": "read_distribution",
+                    "description": "Specify the RSeQC modules to run.",
+                    "enum": [
+                        "bam_stat",
+                        "inner_distance",
+                        "infer_experiment'",
+                        "junction_annotation",
+                        "read_distribution",
+                        "read_duplication",
+                        "tin"
+                    ]
+                }
+            }
+        },
         "read_processing_options": {
             "title": "Read processing options",
             "type": "object",
@@ -130,7 +152,7 @@
                 },
                 "gtf": {
                     "type": "string",
-                    "default": null
+                    "default": "None"
                 },
                 "fasta_index": {
                     "type": "string",
@@ -175,8 +197,8 @@
                 }
             },
             "required": [
-                "gtf",
-                "fasta"
+                "fasta",
+                "gtf"
             ]
         },
         "institutional_config_options": {
@@ -382,6 +404,9 @@
     "allOf": [
         {
             "$ref": "#/definitions/hops_counting_options"
+        },
+        {
+            "$ref": "#/definitions/qc_settings"
         },
         {
             "$ref": "#/definitions/read_processing_options"

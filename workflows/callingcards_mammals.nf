@@ -5,8 +5,8 @@
 */
 
 def valid_params = [
-    aligners       : ['bwaaln', 'bwamem2', 'bowtie', 'bowtie2'],
-    rseqc_modules  : ['bam_stat', 'inner_distance', 'infer_experiment', 'junction_annotation', 'junction_saturation', 'read_distribution', 'read_duplication', 'tin']
+    aligner       : ['bwaaln', 'bwamem2', 'bowtie', 'bowtie2'],
+    rseqc_modules  : ['bam_stat', 'inner_distance', 'infer_experiment', 'junction_annotation', 'read_distribution', 'read_duplication', 'tin']
 ]
 
 def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
@@ -177,8 +177,6 @@ workflow CALLINGCARDS_MAMMALS {
     ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.samtools_flagstat.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.samtools_idxstats.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.picard_qc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.featurecounts_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.featurecounts_summary.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_bamstat.collect{it[1]}.ifEmpty([]))
 	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_inferexperiment.collect{it[1]}.ifEmpty([]))
 	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_innerdistance.collect{it[1]}.ifEmpty([]))
