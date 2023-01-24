@@ -152,7 +152,8 @@
                 },
                 "gtf": {
                     "type": "string",
-                    "default": "None"
+                    "default": "None",
+                    "description": "path to a GTF format annotation file"
                 },
                 "fasta_index": {
                     "type": "string",
