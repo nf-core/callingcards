@@ -77,7 +77,7 @@ in the [configuration section of the nextflow documentation](https://www.nextflo
 
 ## Documentation
 
-The nf-core/callingcards pipeline comes with documentation about the pipeline [usage](docs/usage.md), [parameters](docs/parameters.md) and [output](docs/output.md).
+The nf-core/callingcards pipeline comes with documentation about the pipeline [usage](https://nf-co.re/callingcards/usage), [parameters](https://nf-co.re/callingcards/parameters) and [output](https://nf-co.re/callingcards/output).
 
 ## Credits
 
