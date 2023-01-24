@@ -4,6 +4,11 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+def valid_params = [
+    aligners       : ['bwaaln', 'bwamem2', 'bowtie', 'bowtie2'],
+    rseqc_modules  : ['bam_stat', 'inner_distance', 'infer_experiment', 'junction_annotation', 'junction_saturation', 'read_distribution', 'read_duplication', 'tin']
+]
+
 def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 
 // Validate input parameters
@@ -87,6 +92,8 @@ workflow CALLINGCARDS_MAMMALS {
 
     ch_gtf = Channel.fromPath(params.gtf).collect()
 
+    def rseqc_modules = params.rseqc_modules ? params.rseqc_modules.split(',').collect{ it.trim().toLowerCase() } : []
+
     //
     // SUBWORKFLOW_1: Read in samplesheet, validate and stage input files
     //
@@ -137,6 +144,8 @@ workflow CALLINGCARDS_MAMMALS {
     PROCESS_ALIGNMENTS (
         ch_aln_with_details,
         fasta,
+        PREPARE_GENOME.out.genome_bed,
+        rseqc_modules,
         PREPARE_GENOME.out.fai,
         ch_gtf,
         ch_biotypes_header_multiqc

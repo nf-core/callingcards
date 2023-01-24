@@ -6,7 +6,7 @@ include { BWAMEM2_INDEX  } from  "${projectDir}/modules/nf-core/bwamem2/index/ma
 include { BWA_INDEX      } from  "${projectDir}/modules/nf-core/bwa/index/main"
 include { BOWTIE2_BUILD  } from  "${projectDir}/modules/nf-core/bowtie2/build/main"
 include { BOWTIE_BUILD   } from  "${projectDir}/modules/nf-core/bowtie/build/main"
-include { GTF2BED        } from "${projectDir}/modules/local/gtf2bed"
+include { GTF2BED        } from "${projectDir}/modules/local/gtf2bed/main"
 include { SAMTOOLS_FAIDX } from "${projectDir}/modules/nf-core/samtools/faidx/main"
 
 workflow PREPARE_GENOME {
@@ -21,6 +21,11 @@ workflow PREPARE_GENOME {
     ch_bwa_aln_index = Channel.empty()
     ch_bowtie2_index = Channel.empty()
     ch_bowtie_index = Channel.of("")
+
+    GTF2BED(
+        gtf
+    )
+    ch_versions = ch_versions.mix(GTF2BED.out.versions)
 
     if(params.aligner == 'bwamem2'){
 
@@ -77,6 +82,7 @@ workflow PREPARE_GENOME {
 
     emit:
     fai           = ch_fasta_index          // [val(meta), path(*.fai)]
+    genome_bed    = GTF2BED.out.bed         // [path(genome .bed)]
     bwamem2_index = ch_bwamem2_index        // [val(meta), index_data ]
     bwa_aln_index = ch_bwa_aln_index        // [val(meta), index_data ]
     bowtie2_index = ch_bowtie2_index        // [val(meta), index_data ]

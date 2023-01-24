@@ -13,6 +13,8 @@ workflow PROCESS_ALIGNMENTS {
     take:
     aln //channel: [ val(meta), path(bam), path(bai), path(barcode_details) ]
     fasta // path(genome.fasta)
+    ch_genome_bed
+    rseqc_modules
     fai // [ val(meta), path(genome.fasta.fai) ]
     ch_gtf // [ path(gtf) ]
     biotypes_header_multiqc
@@ -28,9 +30,10 @@ workflow PROCESS_ALIGNMENTS {
       .set{ bam_bai }
 
     BAM_STATS_SAMTOOLS(
-        bam_bai
+        bam_bai,
+        fasta
     )
-    ch_versions = ch_versions.mix(SAMTOOLS_BAM_STATS.out.versions)
+    ch_versions = ch_versions.mix(BAM_STATS_SAMTOOLS.out.versions)
 
     PICARD_COLLECTMULTIPLEMETRICS(
         bam_bai,
@@ -80,9 +83,9 @@ workflow PROCESS_ALIGNMENTS {
     ch_versions = ch_versions.mix(MULTIQC_CUSTOM_BIOTYPE.out.versions)
 
     emit:
-    samtools_stats = SAMTOOLS_BAM_STATS.out.stats
-    samtools_flagstat = SAMTOOLS_BAM_STATS.out.flagstat
-    samtools_idxstats = SAMTOOLS_BAM_STATS.out.idxstats
+    samtools_stats = BAM_STATS_SAMTOOLS.out.stats
+    samtools_flagstat = BAM_STATS_SAMTOOLS.out.flagstat
+    samtools_idxstats = BAM_STATS_SAMTOOLS.out.idxstats
     picard_qc = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
     featurecounts_multiqc = MULTIQC_CUSTOM_BIOTYPE.out.tsv
     featurecounts_summary = SUBREAD_FEATURECOUNTS.out.summary
