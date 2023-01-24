@@ -48,16 +48,9 @@ Note that more detailed instructions are available in [usage](docs/usage.md).
 1. Testing with a minimal data set. This tests the installation only.
 
    ```bash
-   $ mkdir calling_card_output
-
-   $ cd calling_card_output
-
-   $ git clone https://github.com/cmatKhan/nf-callingcards.git
-
-   # you can replace singularity below with any one of the dependency managers
-   # There are also other test profiles -- see usage for more detail
-   $ nextflow run callingcards -profile test,singularity
+     nextflow run nf-core/callingcards -profile test,YOURPROFILE --outdir <OUTDIR>
    ```
+
 
    Note that some form of configuration will be needed so that Nextflow knows how to fetch the required software. This is usually done in the form of a config profile (`test_human` and `singularity` in the example command above). You can chain multiple config profiles in a comma-separated string, as demonstrated.
 
@@ -71,7 +64,7 @@ Note that more detailed instructions are available in [usage](docs/usage.md).
 1. Start running your own analysis!
 
    ```bash
-   nextflow run callingcards/main.nf \
+   nextflow run nf-core/callingcards \
         -params-file params.json \
         -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> \
         # possibly more config settings for your environment
