@@ -12,7 +12,7 @@ processing runs are provided through the profiles [yeast](../conf/default_yeast.
 
 ```
 $ nextflow run callingcards/main.nf \
-    -profile default_human,singularity \
+    -profile default_mammals,singularity \
     -c local.config \
     --input /path/to/samplesheet.csv
     --fasta /path/to/genome.fasta
@@ -142,7 +142,7 @@ The typical command for running the pipeline is as follows:
 
 ```
 $ nextflow run callingcards/main.nf \
-    -profile default_mammal,singularity \
+    -profile default_mammals,singularity \
     -c local.config \
     --input /path/to/your_samplesheet.csv
     --fasta /path/to/genome.fa
@@ -164,7 +164,7 @@ in which case the `run` command would look like:
 
 ```bash
 $ nextflow run callingcards \
-    -profile default_mammal,singularity \
+    -profile default_mammals,singularity \
     -c local.config \
     -params-file path/to/params.json
 
