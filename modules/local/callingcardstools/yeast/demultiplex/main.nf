@@ -3,8 +3,8 @@ process DEMULTIPLEX {
     label 'process_single'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'docker://cmatkhan/callingcardstools:0.2.0' :
-        'docker://cmatkhan/callingcardstools:0.2.0' }"
+        'docker://cmatkhan/callingcardstools:1.0.0' :
+        'docker://cmatkhan/callingcardstools:1.0.0' }"
 
     input:
     tuple val(meta), path(reads), path(barcode_details)
