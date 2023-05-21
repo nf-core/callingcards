@@ -50,16 +50,17 @@ then you should use that profile in the `-profile` flag instead.
 You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 4 columns, and a header row as shown in the examples below.
 You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 4 columns, and a header row as shown in the examples below.
 
-```console
+````console
 ```console
 --input '[path to samplesheet file]'
-```
+````
+
 Or, if you are using a file to save the run parameters (recommended), rather than submitting them on the command line,
 then the file, with only the input set, would look like so:
 Or, if you are using a file to save the run parameters (recommended), rather than submitting them on the command line,
 then the file, with only the input set, would look like so:
 
-```json
+````json
 ```json
 
 {
@@ -69,7 +70,7 @@ then the file, with only the input set, would look like so:
   "input":"input_samplesheet.csv"
 }
 
-```
+````
 
 ### Full samplesheet
 
@@ -94,12 +95,12 @@ mouse_AY09-1_100_lowQuality,mouse/test_data/AY09-1_100k_downsampled_mouse_lowQua
 
 ```
 
-| Column         | Description                                                                                                                                                                            |
-|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Column            | Description                                                                                                                                                                            |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sample`          | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
 | `fastq_1`         | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `fastq_2`         | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".
-| `barcode_details` | Full path to the barcode details json file for a given sample. |
+| `fastq_2`         | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
+| `barcode_details` | Full path to the barcode details json file for a given sample.                                                                                                                         |
 
 An [example samplesheet](../assets/human/input_samplesheet.csv) has been provided with the pipeline.
 
@@ -107,22 +108,22 @@ An [example samplesheet](../assets/human/input_samplesheet.csv) has been provide
 
 The barcode details json stores data which allows the pipeline to relate sequence barcodes in the calling cards reads to a given transcription factor.
 
-#### __[Mammals](../assets/human/barcode_details.json)__
+#### **[Mammals](../assets/human/barcode_details.json)**
 
 Yeast requires three fields: `indicies`, `components` and `tf_map`. Not that most likely,
 you will only ever need to change the `tf_map` component.
 
-| Fields         | Description                                                                                                                                                                            |
-|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `batch`        | Optional. Might be a run, eg run_1234 |
-| `tf`           | Optional. Either ID or symbol of the TF |
-| `r1`           | keys correspond to barcode component names. Each component is a map with keys `trim` which is boolean. Set to true to trim off this portion of the read (NOTE: not used in mammals pipeline. Instead controlled by UMITools). `index` specifies where this component occurs in the read |
-| `r2`           | same as `r1` |
-| `components`   | Each key corresponds to a component in `r1` or `r2` and must be preceeded by `r1` or `r2` as appropriate. Each value is a map where the key `map` is required and lists the expected sequence(s) for that component. optional additional keys are `match_allowance` to allow mismatches > 0, `bam_tag` which is used to add the sequence extracted from the read to the aligned read, `match_type` which controls how the sequences are matched (default is `edit_distance` and appropriate in most circumstances), and `require` is a boolean which, when set to false, allows any number of mismatches in the component without penalty.|
-| `insert_seq`   | A list of sequences expected to be present on the 5' end of the aligned read |[]
-| `max_mismatch` | the maximum number of mismatches allowed in a barcode. By default this is equal to the sum of the mismatches allowed on each component. Set this to less than that sum to fail barcodes which pass component checks, but have more than x number of mismatches overall |[]
+| Fields         | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --- |
+| `batch`        | Optional. Might be a run, eg run_1234                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `tf`           | Optional. Either ID or symbol of the TF                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `r1`           | keys correspond to barcode component names. Each component is a map with keys `trim` which is boolean. Set to true to trim off this portion of the read (NOTE: not used in mammals pipeline. Instead controlled by UMITools). `index` specifies where this component occurs in the read                                                                                                                                                                                                                                                                                                                                                    |
+| `r2`           | same as `r1`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `components`   | Each key corresponds to a component in `r1` or `r2` and must be preceeded by `r1` or `r2` as appropriate. Each value is a map where the key `map` is required and lists the expected sequence(s) for that component. optional additional keys are `match_allowance` to allow mismatches > 0, `bam_tag` which is used to add the sequence extracted from the read to the aligned read, `match_type` which controls how the sequences are matched (default is `edit_distance` and appropriate in most circumstances), and `require` is a boolean which, when set to false, allows any number of mismatches in the component without penalty. |
+| `insert_seq`   | A list of sequences expected to be present on the 5' end of the aligned read                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | []  |
+| `max_mismatch` | the maximum number of mismatches allowed in a barcode. By default this is equal to the sum of the mismatches allowed on each component. Set this to less than that sum to fail barcodes which pass component checks, but have more than x number of mismatches overall                                                                                                                                                                                                                                                                                                                                                                     | []  |
 
-```json
+````json
 
 {
     "batch": "",
@@ -245,7 +246,8 @@ you will only ever need to change the `tf_map` component.
 }
 
 
-```
+````
+
 ```
 
 ## Running the pipeline
@@ -253,12 +255,14 @@ you will only ever need to change the `tf_map` component.
 The typical command for running the pipeline is as follows:
 
 ```
+
 $ nextflow run callingcards/main.nf \
-    -profile default_mammals,singularity \
-    -c local.config \
-    --input /path/to/your_samplesheet.csv
-    --fasta /path/to/genome.fa
-```
+ -profile default_mammals,singularity \
+ -c local.config \
+ --input /path/to/your_samplesheet.csv
+--fasta /path/to/genome.fa
+
+````
 
 __Note__: you can also save your input parameters in a json format. For
 instance, in the case of the run command above, you could create a
@@ -270,7 +274,7 @@ file called `params.json` which looks like so:
     "input":"/path/to/your_samplesheet.csv"
 }
 
-```
+````
 
 in which case the `run` command would look like:
 
@@ -282,16 +286,15 @@ $ nextflow run callingcards/main.nf \
     --fasta /path/to/genome.fa
 ```
 
-__Note__: you can also save your input parameters in a json format. For
+**Note**: you can also save your input parameters in a json format. For
 instance, in the case of the run command above, you could create a
 file called `params.json` which looks like so:
 
 ```json
 {
-    "fasta":"/path/to/genome.fa",
-    "input":"/path/to/your_samplesheet.csv"
+  "fasta": "/path/to/genome.fa",
+  "input": "/path/to/your_samplesheet.csv"
 }
-
 ```
 
 in which case the `run` command would look like:
@@ -309,7 +312,6 @@ $ nextflow run callingcards \
 
 ```
 
-
 This will launch the pipeline with the `default_mammal` pipeline settings. It will use the `singularity` profile, and
 set user specific system configuration (eg executor settings) in a file called local.config. Parameters such as `input`,
 the path to the samplesheet, `output`, and other run parameters will be set in the params.json file.
@@ -322,7 +324,7 @@ See below for more information about profiles.
 
 Note that the pipeline will create the following files in your working directory:
 
-```console
+````console
 work            # Directory containing the nextflow working files
 results         # Finished results (configurable, see below)
 .nextflow_log   # Log file from Nextflow
@@ -331,7 +333,7 @@ work            # Directory containing the nextflow working files
 results         # Finished results (configurable, see below)
 .nextflow_log   # Log file from Nextflow
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
-```
+````
 
 If you wish to repeatedly use the same parameters for multiple runs, rather than specifying each flag in the command, you can specify these in a params file.
 
@@ -392,25 +394,25 @@ They are loaded in sequence, so later profiles can overwrite earlier profiles.
 If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on the `PATH`. This is _not_ recommended, since it can lead to different results on different machines dependent on the computer enviroment.
 If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on the `PATH`. This is _not_ recommended, since it can lead to different results on different machines dependent on the computer enviroment.
 
-* `docker`
-    * A generic configuration profile to be used with [Docker](https://docker.com/)
-* `singularity`
-    * A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
-* `podman`
-    * A generic configuration profile to be used with [Podman](https://podman.io/)
-* `shifter`
-    * A generic configuration profile to be used with [Shifter](https://nersc.gitlab.io/development/shifter/how-to-use/)
-* `charliecloud`
-    * A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
-* `conda`
-    * A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter or Charliecloud.
-* `default_mammals`
-    * A profile with suggested configuration for human and mouse data
-* `test`
-    * A profile with a complete configuration for human data for automated testing
-    * Mouse data would run through the same steps, hence `default_mammals` is
-      appropriate for both human and mouse
-    * Includes links to test data -- no other parameters necessary
+- `docker`
+  - A generic configuration profile to be used with [Docker](https://docker.com/)
+- `singularity`
+  - A generic configuration profile to be used with [Singularity](https://sylabs.io/docs/)
+- `podman`
+  - A generic configuration profile to be used with [Podman](https://podman.io/)
+- `shifter`
+  - A generic configuration profile to be used with [Shifter](https://nersc.gitlab.io/development/shifter/how-to-use/)
+- `charliecloud`
+  - A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
+- `conda`
+  - A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter or Charliecloud.
+- `default_mammals`
+  - A profile with suggested configuration for human and mouse data
+- `test`
+  - A profile with a complete configuration for human data for automated testing
+  - Mouse data would run through the same steps, hence `default_mammals` is
+    appropriate for both human and mouse
+  - Includes links to test data -- no other parameters necessary
 
 ### `-resume`
 
@@ -484,35 +486,35 @@ The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementatio
 2. Find the latest version of the Biocontainer available on [Quay.io](https://quay.io/repository/biocontainers/pangolin?tag=latest&tab=tags)
 3. Create the custom config accordingly:
 
-    * For Docker:
+   - For Docker:
 
-        ```nextflow
-        process {
-            withName: PANGOLIN {
-                container = 'quay.io/biocontainers/pangolin:3.0.5--pyhdfd78af_0'
-            }
-        }
-        ```
+     ```nextflow
+     process {
+         withName: PANGOLIN {
+             container = 'quay.io/biocontainers/pangolin:3.0.5--pyhdfd78af_0'
+         }
+     }
+     ```
 
-    * For Singularity:
+   - For Singularity:
 
-        ```nextflow
-        process {
-            withName: PANGOLIN {
-                container = 'https://depot.galaxyproject.org/singularity/pangolin:3.0.5--pyhdfd78af_0'
-            }
-        }
-        ```
+     ```nextflow
+     process {
+         withName: PANGOLIN {
+             container = 'https://depot.galaxyproject.org/singularity/pangolin:3.0.5--pyhdfd78af_0'
+         }
+     }
+     ```
 
-    * For Conda:
+   - For Conda:
 
-        ```nextflow
-        process {
-            withName: PANGOLIN {
-                conda = 'bioconda::pangolin=3.0.5'
-            }
-        }
-        ```
+     ```nextflow
+     process {
+         withName: PANGOLIN {
+             conda = 'bioconda::pangolin=3.0.5'
+         }
+     }
+     ```
 
 > **NB:** If you wish to periodically update individual tool-specific results (e.g. Pangolin) generated by the pipeline then you must ensure to keep the `work/` directory otherwise the `-resume` ability of the pipeline will be compromised and it will restart from scratch.
 
@@ -554,7 +556,7 @@ Some HPC setups also allow you to run nextflow within a cluster job submitted yo
 In some cases, the Nextflow Java virtual machines can start to request a large amount of memory.
 We recommend adding the following line to your environment to limit this (typically in `~/.bashrc` or `~./bash_profile`):
 
-```console
+````console
 ```console
 NXF_OPTS='-Xms1g -Xmx4g'
-```
+````

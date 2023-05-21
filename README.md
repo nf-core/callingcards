@@ -24,26 +24,26 @@ On release, automated continuous integration tests run the pipeline on a full-si
 ## Pipeline summary
 
 1. Prepare Reads
-    1. Extract barcodes ([`UMItools`](https://github.com/CGATOxford/UMI-tools))
-    1. Trim, and reduce to only R1 depending on user input ([`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic))
+   1. Extract barcodes ([`UMItools`](https://github.com/CGATOxford/UMI-tools))
+   1. Trim, and reduce to only R1 depending on user input ([`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic))
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 1. Prepare the Genome
-    1. Samtools faidx and aligner indicies
+   1. Samtools faidx and aligner indicies
 1. Alignment
-    1. One of: [`bwamem2`](https://github.com/bwa-mem2/bwa-mem2),[`bwa`](https://bio-bwa.sourceforge.net/bwa.shtml),[`bowtie2`](https://bowtie-bio.sourceforge.net/bowtie2/index.shtml),[`bowtie`](https://bowtie-bio.sourceforge.net/index.shtml)
+   1. One of: [`bwamem2`](https://github.com/bwa-mem2/bwa-mem2),[`bwa`](https://bio-bwa.sourceforge.net/bwa.shtml),[`bowtie2`](https://bowtie-bio.sourceforge.net/bowtie2/index.shtml),[`bowtie`](https://bowtie-bio.sourceforge.net/index.shtml)
 1. Process Alignments
-    1. Extract alignment QC metrics ([`Samtools`](https://www.htslib.org/, [Picard](https://gatk.broadinstitute.org/hc/en-us/articles/360037594031-CollectMultipleMetrics-Picard-), [RSeQC](https://rseqc.sourceforge.net/))
-    1. Quantify transposon hops and perform calling cards specific QC ([pycallingcards](https://github.com/cmatKhan/pycallingcards/tree/raw_processing/pycallingcards/raw_processing))
-    1. Peak calling and significance statistics ([pycallingcards](https://github.com/cmatKhan/pycallingcards/tree/raw_processing/pycallingcards/raw_processing))
+   1. Extract alignment QC metrics ([`Samtools`](https://www.htslib.org/, [Picard](https://gatk.broadinstitute.org/hc/en-us/articles/360037594031-CollectMultipleMetrics-Picard-), [RSeQC](https://rseqc.sourceforge.net/))
+   1. Quantify transposon hops and perform calling cards specific QC ([pycallingcards](https://github.com/cmatKhan/pycallingcards/tree/raw_processing/pycallingcards/raw_processing))
+   1. Peak calling and significance statistics ([pycallingcards](https://github.com/cmatKhan/pycallingcards/tree/raw_processing/pycallingcards/raw_processing))
 1. Present QC for raw read and alignment metrics ([`MultiQC`](http://multiqc.info/))
 1. Prepare the Genome
-    1. Samtools faidx and aligner indicies
+   1. Samtools faidx and aligner indicies
 1. Alignment
-    1. One of: [`bwamem2`](https://github.com/bwa-mem2/bwa-mem2),[`bwa`](https://bio-bwa.sourceforge.net/bwa.shtml),[`bowtie2`](https://bowtie-bio.sourceforge.net/bowtie2/index.shtml),[`bowtie`](https://bowtie-bio.sourceforge.net/index.shtml)
+   1. One of: [`bwamem2`](https://github.com/bwa-mem2/bwa-mem2),[`bwa`](https://bio-bwa.sourceforge.net/bwa.shtml),[`bowtie2`](https://bowtie-bio.sourceforge.net/bowtie2/index.shtml),[`bowtie`](https://bowtie-bio.sourceforge.net/index.shtml)
 1. Process Alignments
-    1. Extract alignment QC metrics ([`Samtools`](https://www.htslib.org/, [Picard](https://gatk.broadinstitute.org/hc/en-us/articles/360037594031-CollectMultipleMetrics-Picard-), [RSeQC](https://rseqc.sourceforge.net/))
-    1. Quantify transposon hops and perform calling cards specific QC ([pycallingcards](https://github.com/cmatKhan/pycallingcards/tree/raw_processing/pycallingcards/raw_processing))
-    1. Peak calling and significance statistics ([pycallingcards](https://github.com/cmatKhan/pycallingcards/tree/raw_processing/pycallingcards/raw_processing))
+   1. Extract alignment QC metrics ([`Samtools`](https://www.htslib.org/, [Picard](https://gatk.broadinstitute.org/hc/en-us/articles/360037594031-CollectMultipleMetrics-Picard-), [RSeQC](https://rseqc.sourceforge.net/))
+   1. Quantify transposon hops and perform calling cards specific QC ([pycallingcards](https://github.com/cmatKhan/pycallingcards/tree/raw_processing/pycallingcards/raw_processing))
+   1. Peak calling and significance statistics ([pycallingcards](https://github.com/cmatKhan/pycallingcards/tree/raw_processing/pycallingcards/raw_processing))
 1. Present QC for raw read and alignment metrics ([`MultiQC`](http://multiqc.info/))
 
 ## Usage
@@ -54,6 +54,7 @@ On release, automated continuous integration tests run the pipeline on a full-si
 > with `-profile test` before running the workflow on actual data.
 
 Note that more detailed instructions are available in [usage](docs/usage.md).
+
 1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=22.10.1`)
 
 1. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) (you can follow [this tutorial](https://singularity-tutorial.github.io/01-installation/)), [`Podman`](https://podman.io/), [`Shifter`](https://nersc.gitlab.io/development/shifter/how-to-use/) or [`Charliecloud`](https://hpc.github.io/charliecloud/) for full pipeline reproducibility.
@@ -65,7 +66,6 @@ Note that more detailed instructions are available in [usage](docs/usage.md).
    ```bash
      nextflow run nf-core/callingcards -profile test,YOURPROFILE --outdir <OUTDIR>
    ```
-
 
    Note that some form of configuration will be needed so that Nextflow knows how to fetch the required software. This is usually done in the form of a config profile (`test_human` and `singularity` in the example command above). You can chain multiple config profiles in a comma-separated string, as demonstrated.
 
@@ -96,13 +96,15 @@ For more details about the output files and reports, please refer to the
 ## Credits
 
 nf-core/callingcards is implemented in nextflow by [Chase Mateusiak](https://orcid.org/0000-0002-2890-4242). It was adapted from scripts written by:
+
 - [Rob Mitra](https://orcid.org/0000-0002-2680-4264)
 - [Juanru Guo](https://orcid.org/0000-0001-8948-9700)
-nf-core/callingcards is implemented in nextflow by [Chase Mateusiak](https://orcid.org/0000-0002-2890-4242). It was adapted from scripts written by:
+  nf-core/callingcards is implemented in nextflow by [Chase Mateusiak](https://orcid.org/0000-0002-2890-4242). It was adapted from scripts written by:
 - [Rob Mitra](https://orcid.org/0000-0002-2680-4264)
 - [Juanru Guo](https://orcid.org/0000-0001-8948-9700)
 
 We thank the following people for their extensive assistance in the development of this pipeline:
+
 - [Joseph Dougherty](https://orcid.org/0000-0002-6385-3997)
 - [Allen Yen](https://orcid.org/0000-0002-3984-541X)
 - [Joseph Dougherty](https://orcid.org/0000-0002-6385-3997)
