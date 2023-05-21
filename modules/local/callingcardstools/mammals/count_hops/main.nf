@@ -35,7 +35,7 @@ process COUNT_HOPS {
     -g $fasta \\
     -f $prefix \\
     -s $suffix \\
-     ${args}
+    ${args}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

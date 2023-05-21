@@ -22,9 +22,9 @@ process CONCATFASTA {
     def prefix      = task.ext.prefix   ?: ""
     def suffix      = task.ext.suffix   ?: ""
     def filename    = prefix + suffix + "concat.fasta"
-    def VERSION     = "8.25" // WARN: Version information not provided by
-                             // tool on CLI. Please update this string
-                             // when bumping container versions.
+    def VERSION     = "8.25"    // WARN: Version information not provided by
+                                // tool on CLI. Please update this string
+                                // when bumping container versions.
 
     """
     cat ${main_fasta} ${additional_fasta} > ${filename}

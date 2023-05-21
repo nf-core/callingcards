@@ -21,9 +21,9 @@ process CONCATFASTQ {
     def prefix      = task.ext.prefix   ?: "${meta.id}"
     def suffix      = task.ext.suffix   ?: ""
     def filename    = prefix + "_" + suffix + "concat.fastq"
-    def VERSION     = "8.25" // WARN: Version information not provided by
-                             // tool on CLI. Please update this string
-                             // when bumping container versions.
+    def VERSION     = "8.25"    // WARN: Version information not provided by
+                                // tool on CLI. Please update this string
+                                // when bumping container versions.
     if (params.gzip_concatenated_fastq) {
     """
     cat ${reads.join(' ')} > ${filename} && \\
