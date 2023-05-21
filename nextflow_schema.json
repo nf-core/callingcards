@@ -2,9 +2,91 @@
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/callingcards/master/nextflow_schema.json",
     "title": "nf-core/callingcards pipeline parameters",
-    "description": "A pipeline for processing calling cards data",
+    "description": "An automated processing pipeline for mammalian bulk calling cards experiments",
     "type": "object",
     "definitions": {
+        "hops_counting_options": {
+            "title": "Hops counting options",
+            "type": "object",
+            "description": "Hops quantification related parameters",
+            "default": "",
+            "properties": {
+                "min_mapq": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Values with less than or equal to this mapq value will not be counted as transpositions. Defaults to 10"
+                }
+            }
+        },
+        "qc_settings": {
+            "title": "QC settings",
+            "type": "object",
+            "description": "Quality Control metric related parameters",
+            "default": "",
+            "properties": {
+                "rseqc_modules": {
+                    "type": "string",
+                    "default": "read_distribution",
+                    "description": "Specify the RSeQC modules to run.",
+                    "enum": [
+                        "bam_stat",
+                        "inner_distance",
+                        "infer_experiment'",
+                        "junction_annotation",
+                        "read_distribution",
+                        "read_duplication",
+                        "tin"
+                    ],
+                    "hidden": true
+                }
+            }
+        },
+        "read_processing_options": {
+            "title": "Read processing options",
+            "type": "object",
+            "description": "Options to control how reads are processed prior to alignment",
+            "default": "",
+            "properties": {
+                "r1_bc_pattern": {
+                    "type": "string",
+                    "default": "None",
+                    "description": "UMITools compliant read 1 barcode pattern. See UMITools documentation"
+                },
+                "r2_bc_pattern": {
+                    "type": "string",
+                    "default": "None",
+                    "description": "UMITools compliant read 2 barcode pattern. See UMITools documentation"
+                },
+                "r1_crop": {
+                    "type": "integer",
+                    "description": "If reads are single_end, this option allows the user to crop the R1 read. This occurs after trimming"
+                },
+                "split_fastq_chunk_size": {
+                    "type": "integer",
+                    "default": 10000,
+                    "description": "Size of the chunks to which the raw fastq file(s) are split for processing. Set to a number equal to or greater than the max number of reads in an input set to prevent chunking. You may want to do this for single node execution. Defaults to 10,000"
+                },
+                "gzip_concatenated_fastq": {
+                    "type": "boolean",
+                    "description": "Set to true to gzip fastq files after concatenating (assuming the fastq have been split -- see split_fastq_chunk_size). Default is false, and generally houl should not need to change this as the concat fastqs are intermediate files, easier for downstream processes to use unzipped, and will be deleted when you delete th work directory.",
+                    "hidden": true
+                }
+            }
+        },
+        "alignment_options": {
+            "title": "Alignment options",
+            "type": "object",
+            "description": "Alignment parameters",
+            "default": "",
+            "properties": {
+                "aligner": {
+                    "type": "string",
+                    "default": "bwamem2",
+                    "description": "Choose one of the configured aligners. Defaults to bwamem2.",
+                    "enum": ["bwamem2", "bwa", "bowtie2", "bowtie"]
+                }
+            }
+        },
         "input_output_options": {
             "title": "Input/output options",
             "type": "object",
@@ -12,6 +94,11 @@
             "description": "Define where the pipeline should find input data and save output data.",
             "required": ["input", "outdir"],
             "properties": {
+                "datatype": {
+                    "type": "string",
+                    "description": "This determines which workflow to run based on the organism and method from which the data originates. Current options are 'yeast' and 'mammal'",
+                    "enum": ["mammal", "yeast"]
+                },
                 "input": {
                     "type": "string",
                     "format": "file-path",
@@ -39,6 +126,18 @@
                     "type": "string",
                     "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
                     "fa_icon": "fas fa-file-signature"
+                },
+                "save_genome_intermediate": {
+                    "type": "boolean",
+                    "description": "Set to true to save intermediate files from the PREPARE_GENOME step, eg genome indicies for a given aligner"
+                },
+                "save_sequence_intermediate": {
+                    "type": "boolean",
+                    "description": "Set to true to save intermediate files from the PREPARE_READS step, eg chunked and demultiplexed fastq files"
+                },
+                "save_alignment_intermediate": {
+                    "type": "boolean",
+                    "description": "set to true to save intermediate files form the ALIGN step, eg un-indexed and unsorted bam files"
                 }
             }
         },
@@ -60,8 +159,61 @@
                     "mimetype": "text/plain",
                     "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
                     "description": "Path to FASTA genome file.",
-                    "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
+                    "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have the appropriate alignment index available this will be generated for you automatically. Combine with `--save_reference` to save alignment index for future runs.",
                     "fa_icon": "far fa-file-code"
+                },
+                "fasta_index": {
+                    "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/plain",
+                    "pattern": "^\\S+\\.fn?a(sta)?(\\.fai)?$",
+                    "description": "Path to FASTA genome file.",
+                    "help_text": "Path to the FASTA genome index (fai) file. If not provided, this will ben generated in the workflow",
+                    "fa_icon": "far fa-file-code"
+                },
+                "gtf": {
+                    "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/plain",
+                    "pattern": "^\\S+\\.gtf(\\.gz)?$",
+                    "description": "Path to GTF annotation file.",
+                    "fa_icon": "fas fa-code-branch",
+                    "help_text": "This parameter is *mandatory* if `--genome` is not specified."
+                },
+                "regions_mask": {
+                    "type": "string",
+                    "default": "example.bed",
+                    "pattern": "^\\S+.bed$",
+                    "format": "file-path",
+                    "mimetype": "text/tsv",
+                    "description": "A bed file which specifies regions to hard mask in genome fasta"
+                },
+                "additional_fasta": {
+                    "type": "string",
+                    "default": "example.fasta",
+                    "pattern": "^\\S+.fasta",
+                    "format": "file-path",
+                    "description": "Additional sequences which will be appended to the genomic fasta file after masking"
+                },
+                "bwamem2_index": {
+                    "type": "string",
+                    "default": "None",
+                    "description": "path to the bwamem2 index. only used if aligner is bwamem2. if the aligner is bwamem2 and this is not provided, the index is created in the pipeline"
+                },
+                "bwa_index": {
+                    "type": "string",
+                    "default": "None",
+                    "description": "path to the bwaaln index. only used if aligner is bwaaln. if the aligner is bwaaln and this is not provided, the index is created in the pipeline"
+                },
+                "bowtie2_index": {
+                    "type": "string",
+                    "default": "None",
+                    "description": "path to the bowtie2 index. only used if aligner is bowtie2. if the aligner is bowtie2 and this is not provided, the index is created in the pipeline"
+                },
+                "bowtie_index": {
+                    "type": "string",
+                    "default": "None",
+                    "description": "path to the bowtie index. only used if aligner is bowtie. if the aligner is bowtie and this is not provided, the index is created in the pipeline"
                 },
                 "igenomes_base": {
                     "type": "string",
@@ -176,6 +328,12 @@
                     "fa_icon": "fas fa-question-circle",
                     "hidden": true
                 },
+                "version": {
+                    "type": "boolean",
+                    "description": "Display version and exit.",
+                    "fa_icon": "fas fa-question-circle",
+                    "hidden": true
+                },
                 "publish_dir_mode": {
                     "type": "string",
                     "default": "copy",
@@ -213,11 +371,29 @@
                     "fa_icon": "fas fa-palette",
                     "hidden": true
                 },
+                "hook_url": {
+                    "type": "string",
+                    "description": "Incoming hook URL for messaging service",
+                    "fa_icon": "fas fa-people-group",
+                    "help_text": "Incoming hook URL for messaging service. Currently, MS Teams and Slack are supported.",
+                    "hidden": true
+                },
                 "multiqc_config": {
                     "type": "string",
                     "description": "Custom config file to supply to MultiQC.",
                     "fa_icon": "fas fa-cog",
                     "hidden": true
+                },
+                "multiqc_logo": {
+                    "type": "string",
+                    "description": "Custom logo file to supply to MultiQC. File name must also be set in the MultiQC config file",
+                    "fa_icon": "fas fa-image",
+                    "hidden": true
+                },
+                "multiqc_methods_description": {
+                    "type": "string",
+                    "description": "Custom MultiQC yaml file containing HTML including a methods description.",
+                    "fa_icon": "fas fa-cog"
                 },
                 "tracedir": {
                     "type": "string",
@@ -239,17 +415,35 @@
                     "description": "Show all params when using `--help`",
                     "hidden": true,
                     "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
-                },
-                "enable_conda": {
-                    "type": "boolean",
-                    "description": "Run this workflow with Conda. You can also use '-profile conda' instead of providing this parameter.",
-                    "hidden": true,
-                    "fa_icon": "fas fa-bacon"
                 }
             }
         }
     },
     "allOf": [
+        {
+            "$ref": "#/definitions/hops_counting_options"
+        },
+        {
+            "$ref": "#/definitions/qc_settings"
+        },
+        {
+            "$ref": "#/definitions/read_processing_options"
+        },
+        {
+            "$ref": "#/definitions/alignment_options"
+        },
+        {
+            "$ref": "#/definitions/hops_counting_options"
+        },
+        {
+            "$ref": "#/definitions/qc_settings"
+        },
+        {
+            "$ref": "#/definitions/read_processing_options"
+        },
+        {
+            "$ref": "#/definitions/alignment_options"
+        },
         {
             "$ref": "#/definitions/input_output_options"
         },
