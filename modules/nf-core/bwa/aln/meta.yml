@@ -1,4 +1,4 @@
-name: bwa
+name: bwa_aln
 description: Find SA coordinates of the input reads for bwa short-read mapping
 keywords:
   - bwa
