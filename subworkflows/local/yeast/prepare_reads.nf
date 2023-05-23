@@ -102,12 +102,6 @@ workflow PREPARE_READS {
             reads.every {it.size() > 0} }
         .set{ demux_concat_reads }
 
-    // run fastqc by TF (note that the barcodes are removed at this point )
-    FASTQCDEMUX ( demux_concat_reads )
-    FASTQCDEMUX.out.html.set{ demux_fastqc_html }
-    FASTQCDEMUX.out.zip.set { demux_fastqc_zip  }
-    ch_versions = ch_versions.mix(FASTQCDEMUX.out.versions.first())
-
     // switch single_end to true in meta and select only R1
     demux_concat_reads
         .map{ meta, reads ->
@@ -116,10 +110,16 @@ workflow PREPARE_READS {
 
     // trim the end of the reads based on params.r1_crop
     TRIMMOMATIC( trimmomatic_input  )
-
-    output_reads = output_reads.mix(TRIMMOMATIC.out.trimmed_reads)
     trimmomatic_log = trimmomatic_log.mix(TRIMMOMATIC.out.log)
     ch_versions = ch_versions.mix(TRIMMOMATIC.out.versions)
+
+    output_reads = output_reads.mix(TRIMMOMATIC.out.trimmed_reads)
+
+    // run fastqc by TF after trimming (note that the barcodes are removed at this point )
+    FASTQCDEMUX ( output_reads )
+    FASTQCDEMUX.out.html.set{ demux_fastqc_html }
+    FASTQCDEMUX.out.zip.set { demux_fastqc_zip  }
+    ch_versions = ch_versions.mix(FASTQCDEMUX.out.versions.first())
 
     emit:
     reads = output_reads   // channel: [ val(meta), [ reads ] ]

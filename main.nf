@@ -41,6 +41,12 @@ if (params.genome == 'GRCm38'){
     }
 }
 
+if (params.genome == 'GRCh38'){
+    if(params.aligner == 'bwa'){
+        params.bwa_index = WorkflowMain.getGenomeAttribute(params, 'bwa')
+    }
+}
+
 if(!params.containsKey('regions_mask')){
     params.regions_mask = null
     log.info"Regions mask not specified. The entire genome will be used for alignment"
