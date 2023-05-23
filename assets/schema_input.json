@@ -29,8 +29,21 @@
                         "maxLength": 0
                     }
                 ]
+            },
+            "barcode_details": {
+                "errorMessage": "barcode_details file cannot contain spaces and must have extension '.json'",
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "pattern": "^\\S+\\.json$"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ]
             }
         },
-        "required": ["sample", "fastq_1"]
+        "required": ["sample", "fastq_1", "fastq_2", "barcode_details"]
     }
 }
