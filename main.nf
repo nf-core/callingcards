@@ -4,7 +4,6 @@
     nf-core/callingcards
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Github : https://github.com/nf-core/callingcards
-
     Website: https://nf-co.re/callingcards
     Slack  : https://nfcore.slack.com/channels/callingcards
 ----------------------------------------------------------------------------------------
@@ -26,6 +25,22 @@ params.fasta = WorkflowMain.getGenomeAttribute(params, 'fasta')
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+include { validateParameters; paramsHelp } from 'plugin/nf-validation'
+
+// Print help message if needed
+if (params.help) {
+    def logo = NfcoreTemplate.logo(workflow, params.monochrome_logs)
+    def citation = '\n' + WorkflowMain.citation(workflow) + '\n'
+    def String command = "nextflow run ${workflow.manifest.name} --input samplesheet.csv --genome GRCh37 -profile docker"
+    log.info logo + paramsHelp(command) + citation + NfcoreTemplate.dashedLine(params.monochrome_logs)
+    System.exit(0)
+}
+
+// Validate input parameters
+if (params.validate_params) {
+    validateParameters()
+}
+
 WorkflowMain.initialise(workflow, params, log)
 
 /*
@@ -34,13 +49,13 @@ WorkflowMain.initialise(workflow, params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { CALLINGCARDS_MAMMALS } from './workflows/callingcards_mammals'
+include { CALLINGCARDS } from './workflows/callingcards'
 
 //
 // WORKFLOW: Run main nf-core/callingcards analysis pipeline
 //
-workflow NFCORE_CALLINGCARDS_MAMMALS {
-    CALLINGCARDS_MAMMALS ()
+workflow NFCORE_CALLINGCARDS {
+    CALLINGCARDS ()
 }
 
 /*
@@ -54,7 +69,7 @@ workflow NFCORE_CALLINGCARDS_MAMMALS {
 // See: https://github.com/nf-core/rnaseq/issues/619
 //
 workflow {
-    NFCORE_CALLINGCARDS_MAMMALS ()
+    NFCORE_CALLINGCARDS ()
 }
 
 /*
