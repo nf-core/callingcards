@@ -5,6 +5,61 @@
         "https://github.com/nf-core/modules.git": {
             "modules": {
                 "nf-core": {
+                    "bedtools/maskfasta": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"]
+                    },
+                    "bowtie/align": {
+                        "branch": "master",
+                        "git_sha": "603ecbd9f45300c9788f197d2a15a005685b4220",
+                        "installed_by": ["modules"]
+                    },
+                    "bowtie/build": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"]
+                    },
+                    "bowtie2/align": {
+                        "branch": "master",
+                        "git_sha": "fe54581f8bed20e4c4a51c616c93fd3379d89820",
+                        "installed_by": ["modules"]
+                    },
+                    "bowtie2/build": {
+                        "branch": "master",
+                        "git_sha": "6a24fbe314bb2e6fe6306c29a63076ea87e8eb3c",
+                        "installed_by": ["modules"]
+                    },
+                    "bwa/aln": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"]
+                    },
+                    "bwa/index": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"]
+                    },
+                    "bwa/sampe": {
+                        "branch": "master",
+                        "git_sha": "603ecbd9f45300c9788f197d2a15a005685b4220",
+                        "installed_by": ["modules"]
+                    },
+                    "bwa/samse": {
+                        "branch": "master",
+                        "git_sha": "603ecbd9f45300c9788f197d2a15a005685b4220",
+                        "installed_by": ["modules"]
+                    },
+                    "bwamem2/index": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"]
+                    },
+                    "bwamem2/mem": {
+                        "branch": "master",
+                        "git_sha": "0460d316170f75f323111b4a2c0a2989f0c32013",
+                        "installed_by": ["modules"]
+                    },
                     "custom/dumpsoftwareversions": {
                         "branch": "master",
                         "git_sha": "76cc4938c1f6ea5c7d83fed1eeffc146787f9543",
@@ -18,7 +73,122 @@
                     "multiqc": {
                         "branch": "master",
                         "git_sha": "f2d63bd5b68925f98f572eed70993d205cc694b7",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/multiqc/multiqc.diff"
+                    },
+                    "picard/collectmultiplemetrics": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
                         "installed_by": ["modules"]
+                    },
+                    "preseq/ccurve": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"]
+                    },
+                    "rseqc/bamstat": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules", "bam_rseqc"]
+                    },
+                    "rseqc/inferexperiment": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules", "bam_rseqc"]
+                    },
+                    "rseqc/innerdistance": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules", "bam_rseqc"]
+                    },
+                    "rseqc/junctionannotation": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["bam_rseqc"]
+                    },
+                    "rseqc/junctionsaturation": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["bam_rseqc"]
+                    },
+                    "rseqc/readdistribution": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["bam_rseqc", "modules"]
+                    },
+                    "rseqc/readduplication": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["bam_rseqc", "modules"]
+                    },
+                    "rseqc/tin": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules", "bam_rseqc"]
+                    },
+                    "samtools/faidx": {
+                        "branch": "master",
+                        "git_sha": "fd742419940e01ba1c5ecb172c3e32ec840662fe",
+                        "installed_by": ["modules"]
+                    },
+                    "samtools/flagstat": {
+                        "branch": "master",
+                        "git_sha": "570ec5bcfe19c49e16c9ca35a7a116563af6cc1c",
+                        "installed_by": ["modules", "bam_stats_samtools"]
+                    },
+                    "samtools/idxstats": {
+                        "branch": "master",
+                        "git_sha": "e662ab16e0c11f1e62983e21de9871f59371a639",
+                        "installed_by": ["modules", "bam_stats_samtools"]
+                    },
+                    "samtools/index": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"]
+                    },
+                    "samtools/merge": {
+                        "branch": "master",
+                        "git_sha": "0460d316170f75f323111b4a2c0a2989f0c32013",
+                        "installed_by": ["modules"]
+                    },
+                    "samtools/sort": {
+                        "branch": "master",
+                        "git_sha": "a0f7be95788366c1923171e358da7d049eb440f9",
+                        "installed_by": ["modules"]
+                    },
+                    "samtools/stats": {
+                        "branch": "master",
+                        "git_sha": "735e1e04e7e01751d2d6e97055bbdb6f70683cc1",
+                        "installed_by": ["bam_stats_samtools", "modules"]
+                    },
+                    "subread/featurecounts": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"]
+                    },
+                    "trimmomatic": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"]
+                    },
+                    "umitools/extract": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"]
+                    }
+                }
+            },
+            "subworkflows": {
+                "nf-core": {
+                    "bam_rseqc": {
+                        "branch": "master",
+                        "git_sha": "dedc0e31087f3306101c38835d051bf49789445a",
+                        "installed_by": ["subworkflows"]
+                    },
+                    "bam_stats_samtools": {
+                        "branch": "master",
+                        "git_sha": "dedc0e31087f3306101c38835d051bf49789445a",
+                        "installed_by": ["subworkflows"]
                     }
                 }
             }

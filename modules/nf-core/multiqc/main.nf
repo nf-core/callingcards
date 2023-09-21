@@ -7,7 +7,10 @@ process MULTIQC {
         'quay.io/biocontainers/multiqc:1.14--pyhdfd78af_0' }"
 
     input:
-    path  multiqc_files, stageAs: "?/*"
+    tuple val(meta), path(multiqc_files, stageAs: "?/*")
+    path(workflow_summary)
+    path(methods_description)
+    path(software_versions)
     path(multiqc_config)
     path(extra_multiqc_config)
     path(multiqc_logo)
