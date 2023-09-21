@@ -14,9 +14,12 @@ class WorkflowCallingcards {
 
         genomeExistsError(params, log)
 
+        if (!params.genome && !params.fasta) {
+            Nextflow.error "Genome fasta file not specified with e.g. '--genome <pre-configured igenome>' or '--fasta genome.fa' or via a detectable config file."
+        }
 
-        if (!params.fasta) {
-            Nextflow.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
+        if (!params.genome && !params.gtf) {
+            Nextflow.error "Genome GTF file not specified with e.g. '--genome <preconfigured igenome name> or '--gtf genome.gtf' or via a detectable config file."
         }
     }
 
