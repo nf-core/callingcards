@@ -35,19 +35,11 @@ workflow PREPARE_READS {
     FASTQCRAW.out.html.set{ raw_fastqc_html }
     FASTQCRAW.out.zip.set{ raw_fastqc_zip }
 
-
-    // split the reads into chunks
-    // reads.join(barcode_details,by:0)
-    //     .map { meta, reads, barcode_details ->
-    //             [meta, reads[0], reads[1], barcode_details]}
-    //     .splitFastq(by: params.split_fastq_chunk_size, pe:true, file: true)
-    //     .map{ meta, read1, read2, barcode_details ->
-    //         [add_split(meta, read1.getName()), [read1, read2], barcode_details]}
-    //     .set{ split_reads_with_barcode_details }
-
     SEQKIT_SPLIT2 ( reads )
     ch_versions = ch_versions.mix(SEQKIT_SPLIT2.out.versions)
 
+    // NOTE!! I am relying on groupTuple() to put the reads in the right
+    // order. need to do thi explicitly somehow.
     SEQKIT_SPLIT2.out.reads
         .transpose()
         .map{ meta, read ->
