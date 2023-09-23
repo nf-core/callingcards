@@ -92,6 +92,25 @@ if (params.validate_params) {
     validateParameters()
 }
 
+// Validate some of the more idiosyncratic parameters specific to callingcards
+if (params.split_fastq_by_size != null && params.split_fastq_by_part != null){
+    exit 1, 'You have specified both `split_fastq_by_size` and `split_fastq_by_part`.' +
+    ' Please specify only one of these parameters. The other should be null.'
+}
+
+// Check that nonsensical combinations of parameters are not set
+if (params.additional_fasta && (params.bwa_index || params.bwamem2_index || params.bowtie_index || params.bowtie2_index)) {
+    exit 1, 'You have specified an additional fasta file and a genome index.' +
+    ' If the genome index is not equivalent to the main fasta file,' +
+    ' then omit the index and allow the pipeline to create it from' +
+    ' the concatenated fasta files.'
+}
+
+if (params.datatype == "mammals" && params.r1_bc_pattern == null){
+    exit 1, 'You have not specified a barcode pattern for mammalian data.' +
+    ' Please specify a barcode pattern using the `r1_bc_pattern` parameter.'
+}
+
 WorkflowMain.initialise(workflow, params, log)
 
 /*
@@ -130,8 +149,7 @@ workflow {
     } else if (params.datatype == 'yeast'){
         NFCORE_CALLINGCARDS_YEAST ()
     } else {
-        exit 1, "Invalid datatype specified: ${params.datatype}. " +
-        "Valid options are 'mammals' or 'yeast'"
+        exit 1, "Invalid datatype specified: ${params.datatype}."
     }
 
 }
