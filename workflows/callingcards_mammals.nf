@@ -21,10 +21,17 @@ WorkflowCallingcards.initialise(params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-ch_multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-ch_multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
-ch_multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
-ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+ch_multiqc_config = Channel
+    .fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+ch_multiqc_custom_config = params.multiqc_config
+    ? Channel.fromPath( params.multiqc_config, checkIfExists: true )
+    : Channel.empty()
+ch_multiqc_logo = params.multiqc_logo
+    ? Channel.fromPath( params.multiqc_logo, checkIfExists: true )
+    : Channel.empty()
+ch_multiqc_custom_methods_description = params.multiqc_methods_description
+    ? file(params.multiqc_methods_description, checkIfExists: true)
+    : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -71,7 +78,6 @@ if(params.gtf){
     exit 1, 'Either a valid configured `genome` or a `gtf` file must be specified.'
 }
 
-
 ch_regions_mask = params.regions_mask ?
         Channel.fromPath(params.regions_mask, checkIfExists: true)
                 .collect().map{ it -> [[id:it[0].getSimpleName()], it[0]]} :
@@ -84,14 +90,6 @@ additional_fasta = params.additional_fasta ?
 def rseqc_modules = params.rseqc_modules ?
     params.rseqc_modules.split(',').collect{ it.trim().toLowerCase() } :
     []
-
-// Check that nonsensical combinations of parameters are not set
-if (params.additional_fasta && (params.bwa_index || params.bwamem2_index || params.bowtie_index || params.bowtie2_index)) {
-    exit 1, 'You have specified an additional fasta file and a genome index.' +
-    ' If the genome index is not equivalent to the main fasta file,' +
-    ' then omit the index and allow the pipeline to create it from' +
-    ' the concatenated fasta files.'
-}
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -166,7 +164,7 @@ workflow CALLINGCARDS_MAMMALS {
     //
     // SUBWORKFLOW_4: align reads
     // input: post-processed reads. note that the fastq have been split into
-    //        chunks based on params.split_fastq_chunk_size. the metadata
+    //        chunks based on params.split_fastq_by_[size/part]. the metadata
     //        includes a key value pair split: <split_number>, eg split: 1
     // output: channel 'bam' with structure [ val(meta), path(bam), path(bai) ]
     //         channel 'versions' with structure [ path(versions) ]

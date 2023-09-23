@@ -5,6 +5,7 @@
 
 include { FASTQC as FASTQCRAW   } from "../../../modules/nf-core/fastqc/main"
 include { FASTQC as FASTQCDEMUX } from "../../../modules/nf-core/fastqc/main"
+include { SEQKIT_SPLIT2         } from "../../../modules/nf-core/seqkit/split2/main"
 include { TRIMMOMATIC           } from "../../../modules/nf-core/trimmomatic/main"
 include { DEMULTIPLEX           } from "../../../modules/local/callingcardstools/yeast/demultiplex/main"
 include { CONCATQC              } from "../../../modules/local/callingcardstools/yeast/concatQC/main"
@@ -34,13 +35,29 @@ workflow PREPARE_READS {
     FASTQCRAW.out.html.set{ raw_fastqc_html }
     FASTQCRAW.out.zip.set{ raw_fastqc_zip }
 
+
     // split the reads into chunks
-    reads.join(barcode_details,by:0)
-        .map { meta, reads, barcode_details ->
-                [meta, reads[0], reads[1], barcode_details]}
-        .splitFastq(by: params.split_fastq_chunk_size, pe:true, file: true)
-        .map{ meta, read1, read2, barcode_details ->
-            [add_split(meta, read1.getName()), [read1, read2], barcode_details]}
+    // reads.join(barcode_details,by:0)
+    //     .map { meta, reads, barcode_details ->
+    //             [meta, reads[0], reads[1], barcode_details]}
+    //     .splitFastq(by: params.split_fastq_chunk_size, pe:true, file: true)
+    //     .map{ meta, read1, read2, barcode_details ->
+    //         [add_split(meta, read1.getName()), [read1, read2], barcode_details]}
+    //     .set{ split_reads_with_barcode_details }
+
+    SEQKIT_SPLIT2 ( reads )
+    ch_versions = ch_versions.mix(SEQKIT_SPLIT2.out.versions)
+
+    SEQKIT_SPLIT2.out.reads
+        .transpose()
+        .map{ meta, read ->
+            [WorkflowCallingcards.add_split(meta, read.getName()), read]}
+        .groupTuple()
+        .map{meta, reads ->
+                [meta.id, meta, reads]}
+        .combine(barcode_details.map{meta, barcode_json -> [meta.id, barcode_json]}, by:0)
+        .map{id, meta, read, barcode_details ->
+            [meta, read, barcode_details]}
         .set{ split_reads_with_barcode_details }
 
     DEMULTIPLEX(
@@ -106,7 +123,7 @@ workflow PREPARE_READS {
     // switch single_end to true in meta and select only R1
     demux_concat_reads
         .map{ meta, reads ->
-            [to_single_end(meta), reads[0]]}
+            [WorkflowCallingcards.to_single_end(meta), reads[0]]}
             .set{ trimmomatic_input }
 
     // trim the end of the reads based on params.r1_crop
@@ -133,32 +150,12 @@ workflow PREPARE_READS {
     versions = ch_versions // channel: [ versions.yml ]
 }
 
-// set meta.single_end = true; keep all other key:value pairs in meta
-def to_single_end(Map meta) {
-
-    def new_meta = [:]
-
-    meta.each{ k,v ->
-        new_meta[k] = v}
-
-    new_meta.single_end = true
-
-    return new_meta
-}
-
-// extract the split digit
-def extractDigitBeforeExtension(String path) {
-    // Regex pattern to match the digit before the file extension
-    def pattern = /(\d+)(?=\.(fastq|fastq\.gz|fq|fq\.gz)$)/
-
-    // Extract the digit
-    def matcher = path =~ pattern
-    if (matcher.find()) {
-        return matcher[0][1].toInteger()
-    } else {
-        return null
-    }
-}
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Groovy Utility Functions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+import nextflow.util.ArrayBag
 
 // Extract R1 or R2 from the file name
 def extractReadType(String path) {
@@ -172,18 +169,6 @@ def extractReadType(String path) {
     } else {
         return null
     }
-}
-
-// add the split number to the metadata
-def add_split(Map meta, String read){
-    def new_meta = [:]
-
-    meta.each{ k,v ->
-        new_meta[k] = v}
-
-    new_meta.split = extractDigitBeforeExtension(read)
-
-    return new_meta
 }
 
 // add the tf info to the meta
@@ -212,7 +197,6 @@ def remove_read_end(Map meta) {
     return meta
 }
 
-import nextflow.util.ArrayBag
 // sort split files by the split digit in the iflename
 def sortFilesBySplit(ArrayBag<Path> files) {
      // Define a closure that extracts the digit surrounded by underscores
@@ -232,7 +216,6 @@ def sortFilesBySplit(ArrayBag<Path> files) {
     }
 }
 
-import nextflow.util.ArrayBag
 def sortFilesByReadEnd(ArrayBag<Path> files) {
     // Define a closure that extracts the read end (R1 or R2) from the file path
     def extractReadEnd = { String path ->

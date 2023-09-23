@@ -122,4 +122,50 @@ class WorkflowCallingcards {
             Nextflow.error(error_string)
         }
     }
+
+    //
+    // extract the split digit
+    //
+    private static Integer extractDigitBeforeExtension(String path) {
+        // Regex pattern to match the digit before the file extension
+        def pattern = /(\d+)(?=\.(fastq|fastq\.gz|fq|fq\.gz)$)/
+
+        // Extract the digit
+        def matcher = path =~ pattern
+        if (matcher.find()) {
+            return matcher[0][1].toInteger()
+        } else {
+            return null
+        }
+    }
+
+    //
+    // add the split number to the metadata
+    //
+    public static Map add_split(Map meta, String read){
+        def new_meta = [:]
+
+        meta.each{ k,v ->
+            new_meta[k] = v}
+
+        new_meta.split = extractDigitBeforeExtension(read)
+
+        return new_meta
+    }
+
+    //
+    // set meta.single_end to true; retain all other key:value pairs
+    //
+    public static Map to_single_end(Map meta) {
+
+        def new_meta = [:]
+
+        meta.each{ k,v ->
+            new_meta[k] = v}
+
+        new_meta.single_end = true
+
+        return new_meta
+    }
+
 }

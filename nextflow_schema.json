@@ -64,16 +64,19 @@
                     "type": "integer",
                     "description": "If reads are single_end, this option allows the user to crop the R1 read. This occurs after trimming"
                 },
-                "split_fastq_chunk_size": {
-                    "type": "integer",
-                    "default": 10000,
-                    "description": "Size of the chunks to which the raw fastq file(s) are split for processing. Set to a number equal to or greater than the max number of reads in an input set to prevent chunking. You may want to do this for single node execution. Defaults to 10,000",
-                    "hidden": true
-                },
                 "gzip_concatenated_fastq": {
                     "type": "boolean",
                     "description": "Set to true to gzip fastq files after concatenating (assuming the fastq have been split -- see split_fastq_chunk_size). Default is false, and generally houl should not need to change this as the concat fastqs are intermediate files, easier for downstream processes to use unzipped, and will be deleted when you delete th work directory.",
                     "hidden": true
+                },
+                "split_fastq_by_size": {
+                    "type": "integer",
+                    "description": "split_fastq_by_size or split_fastq_by_part may be set, but not both at the same time. These parameters control how many parts the input fastq files are split into for parallel processing on a cluster. See seqkit split2 for more information. By default, split_fastq_by_part is set to 10, which will split every fastq file into 10 parts. If you wish to use split_fastq_by_size, set split_fastq_by_part to null to nullify the default value."
+                },
+                "split_fastq_by_part": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "split_fastq_by_size or split_fastq_by_part may be set, but not both at the same time. These parameters control how many parts the input fastq files are split into for parallel processing on a cluster. See seqkit split2 for more information. By default, split_fastq_by_part is set to 10, which will split every fastq file into 10 parts. If you wish to use split_fastq_by_size, set split_fastq_by_part to null to nullify the default value."
                 }
             }
         },
@@ -82,7 +85,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["input", "outdir", "datatype"],
+            "required": ["datatype", "input", "outdir"],
             "properties": {
                 "datatype": {
                     "type": "string",
