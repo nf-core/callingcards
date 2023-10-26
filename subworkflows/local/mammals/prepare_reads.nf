@@ -21,7 +21,6 @@ workflow PREPARE_READS {
     fastqc_zip      = Channel.empty()
     trimmomatic_log = Channel.empty()
 
-
     // run fastqc after trimming off the barcodes, etc
     FASTQC ( reads ).html.set { fastqc_html }
     fastqc_zip  = FASTQC.out.zip
@@ -29,14 +28,6 @@ workflow PREPARE_READS {
 
     // read output
     ch_reads = Channel.empty()
-
-    // split the reads into chunks
-    // reads
-    //     .map { meta, reads -> [meta, reads[0]] }
-    //     .splitFastq(by: params.split_fastq_chunk_size, file: true)
-    //     .map{ meta, read1 ->
-    //         [add_split(meta, read1.getName()), [read1]]}
-    //     .set{ ch_split_reads }
 
     SEQKIT_SPLIT2 ( reads )
     ch_versions = ch_versions.mix(SEQKIT_SPLIT2.out.versions)
