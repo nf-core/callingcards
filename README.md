@@ -105,8 +105,15 @@ For more details about the output files and reports, please refer to the
 
 ## Credits
 
-nf-core/callingcards was originally written by chase mateusiak <chasem@wustl.edu>
-based on scripts written by [Rob Mitra](https://mitralab.wustl.edu/)
+nf-core/callingcards is implemented in nextflow by [Chase Mateusiak](https://orcid.org/0000-0002-2890-4242). It was adapted from scripts written by:
+
+- [Rob Mitra](https://orcid.org/0000-0002-2680-4264)
+
+We thank the following people for their extensive assistance in the development of this pipeline:
+
+- [Allen Yen](https://orcid.org/0000-0002-3984-541X)
+- [Mari Gachechiladze](https://dbbs.wustl.edu/people/mari-gachechiladze-mstp-in-phd-training/)
+- [Joseph Dougherty](https://orcid.org/0000-0002-6385-3997)
 
 ## Contributions and Support
 
