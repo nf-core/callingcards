@@ -270,6 +270,7 @@ workflow CALLINGCARDS_MAMMALS {
 
     ch_multiqc_files
         .filter{item -> item.size() > 0}
+        .map{meta, item -> [[id: 'collected_qc'], item] }
         .groupTuple()
         .map{meta, qc -> [meta, qc.flatten()]}
         .combine(ch_multiqc_config)

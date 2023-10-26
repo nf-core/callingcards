@@ -114,6 +114,8 @@ workflow CALLINGCARDS_YEAST {
             barcode_details: [meta, barcode_details]}
         .set{ ch_input }
 
+    ch_input.reads.view()
+
 
     // SUBWORKFLOW_2: Index the genome in various ways
     //
