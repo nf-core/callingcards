@@ -13,20 +13,33 @@
 
 ## Introduction
 
-**nf-core/callingcards** is a bioinformatics pipeline that ...
+**nf-core/callingcards** is a bioinformatics pipeline that can be used to process raw Calling Cards data obtained from either mammals (human, mouse) or yeast. It takes a samplesheet, which describes the sample names, paths to the fastq files, and paths to the barcode details json files, a parameter which identifies the
+organism type (either mammals or yeast) and either the name of the reference genome on `igenomes` or paths to the fasta/gff. It then parses the reads, counts the
+number of calling cards insertions, and provides some QC metrics.
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
+![nf-core/rnaseq metro map](docs/images/callingcards_metro_diagram.png)
 
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
-
-1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+1. Prepare the Genome
+    - optional masking with [bedtools](https://bedtools.readthedocs.io/en/latest/)
+    - Create aligner specific indicies. Available aligners:
+        - [bowtie](https://bowtie-bio.sourceforge.net/index.shtml)
+        - [`bowtie2`](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
+        - [`bwa`](http://bio-bwa.sourceforge.net/)
+        - [`bwamem2`](https://github.com/bwa-mem2/bwa-mem2)
+    - Create a genome index with [samtools](http://www.htslib.org/)
+2. Prepare the Reads
+    - Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
+    - Split reads
+        - Yeast: demultiplex by barcode ([`callingCardsTools`](https://github.com/cmatKhan/callingCardsTools))
+        - Mammals: split for parallel processing ([`seqkit`](https://bioinf.shenwei.me/seqkit/))
+            - Mammals: extract barcode to fastq read ID( [UMItools](https://umi-tools.readthedocs.io/en/latest/QUICK_START.html))
+    - Optionally trim reads ([Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic))])
+3. Align
+    - Any one of the aligners listed above in 'Prepare the Genome'
+    - Alignment QC ([`samtools`](http://www.htslib.org/),
+    [picard](https://broadinstitute.github.io/picard/),[rseqc](http://rseqc.sourceforge.net/))))
+4. Count Hops ([`callingCardsTools`](https://cmatkhan.github.io/callingCardsTools/))
+5. Present QC data ([`MultiQC`](http://multiqc.info/))
 
 ## Usage
 
@@ -36,32 +49,45 @@ to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/i
 with `-profile test` before running the workflow on actual data.
 :::
 
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
+First, prepare a samplesheet with your input data according to your organism.
 
-First, prepare a samplesheet with your input data that looks as follows:
+A Yeast samplesheet will look like:
 
-`samplesheet.csv`:
+`yeast_samplesheet.csv`:
 
 ```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+sample,fastq_1,fastq_2,barcode_details
+run_6177,run_6177_sample_R1.fastq.gz,run_6177_sample_R2.fastq.gz,run_6177_barcode_details.json
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
+Each row represents a multiplexed fastq file where the barcode_details.json file
+describes the barcodes which correspond to each transcription factor in the library.
 
--->
+A mammals (human, mouse) samplesheet will look like:
+
+`mammals_samplesheet.csv`:
+
+```csv
+sample,fastq_1,fastq_2,barcode_details
+midbrain_rep3,midbrain_rep3_R1.fastq.gz,,barcode_details.json
+```
+
+Note that currently, the mammals workflow expects only R1 reads.
 
 Now, you can run the pipeline using:
 
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
-
 ```bash
 nextflow run nf-core/callingcards \
-   -profile <docker/singularity/.../institute> \
+   -profile <docker/singularity/.../institute>,<default_yeast/default_mammals> \
    --input samplesheet.csv \
+   --genome <igenomes_name (only required for mammals)> \
    --outdir <OUTDIR>
 ```
+
+Note that the [default_yeast](conf/default_yeast.config) and
+[default_mammals](conf/default_mammals.config) profiles are provided for
+convenience. You should check the parameters which these set to ensure that
+they are what you need for your data.
 
 :::warning
 Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those
@@ -79,11 +105,8 @@ For more details about the output files and reports, please refer to the
 
 ## Credits
 
-nf-core/callingcards was originally written by chase mateusiak <chasem@wustl.edu>.
-
-We thank the following people for their extensive assistance in the development of this pipeline:
-
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
+nf-core/callingcards was originally written by chase mateusiak <chasem@wustl.edu>
+based on scripts written by [Rob Mitra](https://mitralab.wustl.edu/)
 
 ## Contributions and Support
 
@@ -95,8 +118,6 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 
 <!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
 <!-- If you use  nf-core/callingcards for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
-
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 
