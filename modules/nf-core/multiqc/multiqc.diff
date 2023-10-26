@@ -2,14 +2,14 @@ Changes in module 'nf-core/multiqc'
 --- modules/nf-core/multiqc/main.nf
 +++ modules/nf-core/multiqc/main.nf
 @@ -7,7 +7,10 @@
-         'quay.io/biocontainers/multiqc:1.14--pyhdfd78af_0' }"
+         'biocontainers/multiqc:1.17--pyhdfd78af_0' }"
  
      input:
 -    path  multiqc_files, stageAs: "?/*"
 +    tuple val(meta), path(multiqc_files, stageAs: "?/*")
 +    path(workflow_summary)
 +    path(methods_description)
-+    path(software_versions)
++    path(software_versions) 
      path(multiqc_config)
      path(extra_multiqc_config)
      path(multiqc_logo)
