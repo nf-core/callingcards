@@ -7,10 +7,7 @@ process MULTIQC {
         'biocontainers/multiqc:1.17--pyhdfd78af_0' }"
 
     input:
-    tuple val(meta), path(multiqc_files, stageAs: "?/*")
-    path(workflow_summary)
-    path(methods_description)
-    path(software_versions) 
+    path  multiqc_files, stageAs: "?/*"
     path(multiqc_config)
     path(extra_multiqc_config)
     path(multiqc_logo)

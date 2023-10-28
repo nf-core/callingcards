@@ -223,65 +223,31 @@ workflow CALLINGCARDS_MAMMALS {
     //
     workflow_summary    = WorkflowCallingcards.paramsSummaryMultiqc(workflow, summary_params)
     ch_workflow_summary = Channel.value(workflow_summary)
-                            .collectFile(name: 'workflow_summary_mqc.yaml')
 
     methods_description    = WorkflowCallingcards.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description, params)
     ch_methods_description = Channel.value(methods_description)
-                                .collectFile(name: 'methods_description_mqc.yaml')
 
-    // collect process reads logs,etc
+
     ch_multiqc_files = Channel.empty()
-    ch_multiqc_files = ch_multiqc_files.mix(PREPARE_READS.out.fastqc_zip
-        .map{meta, qc -> [['id': (meta.id)], qc]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(PREPARE_READS.out.fastqc_zip
-        .map{meta, qc -> [['id': (meta.id)], qc]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(PREPARE_READS.out.trimmomatic_log
-        .map{meta, qc -> [['id': (meta.id)], qc]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files
-        .mix(PROCESS_ALIGNMENTS.out.samtools_stats
-            .map{meta, qc -> [['id': (meta.id)], qc]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files
-        .mix(PROCESS_ALIGNMENTS.out.samtools_flagstat
-            .map{meta, qc -> [['id': (meta.id)], qc]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files
-        .mix(PROCESS_ALIGNMENTS.out.samtools_idxstats
-            .map{meta, qc -> [['id': (meta.id)], qc]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files
-        .mix(PROCESS_ALIGNMENTS.out.picard_qc
-            .map{meta, qc -> [['id': (meta.id)], qc]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files
-        .mix(PROCESS_ALIGNMENTS.out.rseqc_bamstat
-            .map{meta, qc -> [['id': (meta.id)], qc]}.ifEmpty([]))
-	ch_multiqc_files = ch_multiqc_files
-        .mix(PROCESS_ALIGNMENTS.out.rseqc_inferexperiment
-            .map{meta, qc -> [['id': (meta.id)], qc]}.ifEmpty([]))
-	ch_multiqc_files = ch_multiqc_files
-        .mix(PROCESS_ALIGNMENTS.out.rseqc_innerdistance
-            .map{meta, qc -> [['id': (meta.id)], qc]}.ifEmpty([]))
-	ch_multiqc_files = ch_multiqc_files
-        .mix(PROCESS_ALIGNMENTS.out.rseqc_readdistribution
-            .map{meta, qc -> [['id': (meta.id)], qc]}.ifEmpty([]))
-	ch_multiqc_files = ch_multiqc_files
-        .mix(PROCESS_ALIGNMENTS.out.rseqc_readduplication
-            .map{meta, qc -> [['id': (meta.id)], qc]}.ifEmpty([]))
-	ch_multiqc_files = ch_multiqc_files
-        .mix(PROCESS_ALIGNMENTS.out.rseqc_tin
-            .map{meta, qc -> [['id': (meta.id)], qc]}.ifEmpty([]))
-
-    ch_multiqc_files
-        .filter{item -> item.size() > 0}
-        .map{meta, item -> [[id: 'collected_qc'], item] }
-        .groupTuple()
-        .map{meta, qc -> [meta, qc.flatten()]}
-        .combine(ch_multiqc_config)
-        .map{ it -> [it[0], it[1].plus(it[2..-1].flatten())] }
-        .set{ ch_multiqc_files_grouped }
+    ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
+    ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
+    ch_multiqc_files = ch_multiqc_files.mix(PREPARE_READS.out.fastqc_zip.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PREPARE_READS.out.fastqc_zip.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PREPARE_READS.out.trimmomatic_log.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.samtools_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.samtools_flagstat.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.samtools_idxstats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.picard_qc.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_bamstat.collect{it[1]}.ifEmpty([]))
+	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_inferexperiment.collect{it[1]}.ifEmpty([]))
+	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_innerdistance.collect{it[1]}.ifEmpty([]))
+	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_readdistribution.collect{it[1]}.ifEmpty([]))
+	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_readduplication.collect{it[1]}.ifEmpty([]))
+	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_tin.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
-        ch_multiqc_files_grouped,
-        ch_workflow_summary,
-        ch_methods_description,
-        CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(),
+        ch_multiqc_files.collect(),
         ch_multiqc_config.toList(),
         ch_multiqc_custom_config.toList(),
         ch_multiqc_logo.toList()
