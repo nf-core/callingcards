@@ -48,7 +48,7 @@ workflow ALIGN {
 
         ch_bam = ch_bam.mix(ch_tmp)
 
-    } else if (params.aligner == 'bwaaln') {
+    } else if (params.aligner == 'bwa') {
 
         BWA_ALN (
             reads,
