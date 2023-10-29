@@ -22,7 +22,7 @@ would like to analyse before running the pipeline. Use the `input` parameter to
 specify its location. It has to be a comma-separated file with 4 columns, and
 a header row as shown in the examples below.
 
-__Note:__ Currently, the mammals workflow supports only `fastq_1`. `fastq_2`
+**Note:** Currently, the mammals workflow supports only `fastq_1`. `fastq_2`
 should simply be left blank. The yeast workflow requires both `fastq_1` and
 `fastq_2`.
 
@@ -44,12 +44,12 @@ mouse_AY09-1_100_lowQuality,mouse/test_data/AY09-1_100k_downsampled_mouse_lowQua
 
 ```
 
-| Column         | Description                                                                                                                                                                            |
-|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Column            | Description                                                                                                                                                                            |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sample`          | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
 | `fastq_1`         | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `fastq_2`         | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".
-| `barcode_details` | Full path to the barcode details json file for a given sample. |
+| `fastq_2`         | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
+| `barcode_details` | Full path to the barcode details json file for a given sample.                                                                                                                         |
 
 An [example samplesheet](../assets/human/input_samplesheet.csv) has been provided with the pipeline.
 
@@ -101,22 +101,22 @@ the
 [parameters section of the nf-core/callingcards site](https://nf-co.re/callingcards/dev/parameters)
 
 - The `datatype` parameter accepts either `yeast` or `mammals` and determines
-which workflow to run.
+  which workflow to run.
 
 - The `aligner` parameter accepts either `bwa`, `bwamem2`, `bowtie`, or `bowtie2`
 
 - `split_fastq_by_size` or `split_fastq_by_part` controls how the fastq files
-are split for parallel processing. Set one or the other, not both.
+  are split for parallel processing. Set one or the other, not both.
 
 - `min_mapq` sets the minimal mapping quality for reads to be considered
-'passing' in the hops counting stage. By default, this is `10`.
+  'passing' in the hops counting stage. By default, this is `10`.
 
 - `r1_crop` determines how much of R1 will be passed onto alignment. The read
-is cropped after extracting the non-genomic sequence.
+  is cropped after extracting the non-genomic sequence.
 
 - `save_genome_intermediate`, `save_sequence_intermediate`,
-and `save_alignment_intermediate` may be set to save intermediate files from
-each of the corresponding steps of the workflows.
+  and `save_alignment_intermediate` may be set to save intermediate files from
+  each of the corresponding steps of the workflows.
 
 ## Mammals specific parameters
 
@@ -125,7 +125,7 @@ these parameters are set in the [default_mammals](../conf/default_mammals.config
 profile. But, you should confirm that these are correct for your data.
 
 - `r1_bc_pattern` describes the barcode pattern that will be extracted by
-UMITools on R1.
+  UMITools on R1.
 
 ## Yeast specific parameters
 
@@ -206,7 +206,7 @@ available in these configs please see the [nf-core/configs
 documentation](https://github.com/nf-core/configs#documentation).
 
 Note that multiple profiles can be loaded, for example: `-profile test,docker` -
-the order of arguments is important!  They are loaded in sequence, so later
+the order of arguments is important! They are loaded in sequence, so later
 profiles can overwrite earlier profiles.
 
 If `-profile` is not specified, the pipeline will run locally and expect all
@@ -231,9 +231,9 @@ computer enviroment.
   - A generic configuration profile to be used with [Apptainer](https://apptainer.org/)
 - `conda`
   - A generic configuration profile to be used with [Conda](https://conda.io/docs/).
-  Please only use Conda as a last resort i.e. when it's not possible to run
-  the pipeline with Docker, Singularity, Podman, Shifter, Charliecloud,
-  or Apptainer.
+    Please only use Conda as a last resort i.e. when it's not possible to run
+    the pipeline with Docker, Singularity, Podman, Shifter, Charliecloud,
+    or Apptainer.
 
 #### Calling cards specific profiles
 
@@ -356,7 +356,7 @@ terminal so that the workflow does not stop if you log out of your session. The
 logs are saved to a file.
 
 Alternatively, you can use `screen` / `tmux` or similar tool to create a
-detached session which you can log back into at a later time.  Some HPC setups
+detached session which you can log back into at a later time. Some HPC setups
 also allow you to run nextflow within a cluster job submitted your job scheduler
 (from where it submits more jobs).
 
