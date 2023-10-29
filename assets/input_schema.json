@@ -24,13 +24,13 @@
                 "format": "file-path",
                 "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
                 "anyOf": [
-                {
-                    "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                    "exists": true
-                },
-                {
-                    "maxLength": 0
-                }
+                    {
+                        "pattern": "^\\S+\\.f(ast)?q\\.gz$",
+                        "exists": true
+                    },
+                    {
+                        "maxLength": 0
+                    }
                 ]
             },
             "barcode_details": {

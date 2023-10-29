@@ -20,24 +20,24 @@ number of calling cards insertions, and provides some QC metrics.
 ![nf-core/rnaseq metro map](docs/images/callingcards_metro_diagram.png)
 
 1. Prepare the Genome
-    - optional masking with [bedtools](https://bedtools.readthedocs.io/en/latest/)
-    - Create aligner specific indicies. Available aligners:
-        - [bowtie](https://bowtie-bio.sourceforge.net/index.shtml)
-        - [`bowtie2`](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
-        - [`bwa`](http://bio-bwa.sourceforge.net/)
-        - [`bwamem2`](https://github.com/bwa-mem2/bwa-mem2)
-    - Create a genome index with [samtools](http://www.htslib.org/)
+   - optional masking with [bedtools](https://bedtools.readthedocs.io/en/latest/)
+   - Create aligner specific indicies. Available aligners:
+     - [bowtie](https://bowtie-bio.sourceforge.net/index.shtml)
+     - [`bowtie2`](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
+     - [`bwa`](http://bio-bwa.sourceforge.net/)
+     - [`bwamem2`](https://github.com/bwa-mem2/bwa-mem2)
+   - Create a genome index with [samtools](http://www.htslib.org/)
 2. Prepare the Reads
-    - Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-    - Split reads
-        - Yeast: demultiplex by barcode ([`callingCardsTools`](https://github.com/cmatKhan/callingCardsTools))
-        - Mammals: split for parallel processing ([`seqkit`](https://bioinf.shenwei.me/seqkit/))
-            - Mammals: extract barcode to fastq read ID( [UMItools](https://umi-tools.readthedocs.io/en/latest/QUICK_START.html))
-    - Optionally trim reads ([Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic))])
+   - Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
+   - Split reads
+     - Yeast: demultiplex by barcode ([`callingCardsTools`](https://github.com/cmatKhan/callingCardsTools))
+     - Mammals: split for parallel processing ([`seqkit`](https://bioinf.shenwei.me/seqkit/))
+       - Mammals: extract barcode to fastq read ID( [UMItools](https://umi-tools.readthedocs.io/en/latest/QUICK_START.html))
+   - Optionally trim reads ([Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic))])
 3. Align
-    - Any one of the aligners listed above in 'Prepare the Genome'
-    - Alignment QC ([`samtools`](http://www.htslib.org/),
-    [picard](https://broadinstitute.github.io/picard/),[rseqc](http://rseqc.sourceforge.net/))))
+   - Any one of the aligners listed above in 'Prepare the Genome'
+   - Alignment QC ([`samtools`](http://www.htslib.org/),
+     [picard](https://broadinstitute.github.io/picard/),[rseqc](http://rseqc.sourceforge.net/))))
 4. Count Hops ([`callingCardsTools`](https://cmatkhan.github.io/callingCardsTools/))
 5. Present QC data ([`MultiQC`](http://multiqc.info/))
 
