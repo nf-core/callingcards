@@ -2,9 +2,10 @@ process COUNT_HOPS {
     tag "$meta.id"
     label "process_single"
 
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'docker://cmatkhan/callingcardstools:1.0.0' :
-        'docker://cmatkhan/callingcardstools:1.0.0' }"
+        'https://depot.galaxyproject.org/singularity/callingcardstools:1.2.0--pyhdfd78af_0' :
+        'biocontainers/callingcardstools:1.2.0--pyhdfd78af_0' }"
 
     input:
     tuple val(meta), path(bam), path(bai), path(barcode_details)
@@ -39,7 +40,7 @@ process COUNT_HOPS {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        pycallingcards: \$(pycallingcards --version | sed 's/callingcardstools //g')
+        callingcardstools: \$(callingcardstools --version | sed 's/callingcardstools //g')
     END_VERSIONS
     """
 }

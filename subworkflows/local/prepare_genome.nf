@@ -49,7 +49,6 @@ workflow PREPARE_GENOME {
         ch_fasta = CONCATFASTA.out.fasta
     }
 
-
     GTF2BED(
         gtf
     )
@@ -101,7 +100,10 @@ workflow PREPARE_GENOME {
 
 
     if (!params.fasta_index){
-        SAMTOOLS_FAIDX ( ch_fasta.map{it -> ["", it]} )
+        SAMTOOLS_FAIDX (
+            ch_fasta.map{it -> [['id':null], it]},
+             [['id':null], []]
+        )
         ch_versions = ch_versions.mix(SAMTOOLS_FAIDX.out.versions)
         ch_fasta_index = SAMTOOLS_FAIDX.out.fai
     } else {

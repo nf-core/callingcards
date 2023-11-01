@@ -1,9 +1,9 @@
 # ![nf-core/callingcards](docs/images/nf-core-callingcards_logo_light.png#gh-light-mode-only) ![nf-core/callingcards](docs/images/nf-core-callingcards_logo_dark.png#gh-dark-mode-only)
 
-[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/callingcards/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![GitHub Actions CI Status](https://github.com/nf-core/callingcards/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/callingcards/actions?query=workflow%3A%22nf-core+CI%22)
+[![GitHub Actions Linting Status](https://github.com/nf-core/callingcards/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/callingcards/actions?query=workflow%3A%22nf-core+linting%22)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/callingcards/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
 
-[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A522.10.1-23aa62.svg)](https://www.nextflow.io/)
-[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A522.10.1-23aa62.svg)](https://www.nextflow.io/)
+[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.04.0-23aa62.svg)](https://www.nextflow.io/)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
@@ -13,83 +13,93 @@
 
 ## Introduction
 
-**nf-core/callingcards** is a bioinformatics pipeline that ...
+**nf-core/callingcards** is a bioinformatics pipeline that can be used to process raw Calling Cards data obtained from either mammals (human, mouse) or yeast. It takes a samplesheet, which describes the sample names, paths to the fastq files, and paths to the barcode details json files, a parameter which identifies the
+organism type (either mammals or yeast) and either the name of the reference genome on `igenomes` or paths to the fasta/gff. It then parses the reads, counts the
+number of calling cards insertions, and provides some QC metrics.
 
-**nf-core/callingcards** is a bioinformatics best-practice analysis pipeline for An automated processing pipeline for mammalian bulk calling cards experiments.
+![nf-core/rnaseq metro map](docs/images/callingcards_metro_diagram.png)
 
-The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It uses Docker/Singularity containers which makes installation trivial and results reproducible. The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process which simplifies maintenance and software updates. Where possible, these processes have been submitted to and installed from [nf-core/modules](https://github.com/nf-core/modules) in order to make them available to all nf-core pipelines, and to everyone within the Nextflow community.
-
-On release, automated continuous integration tests run the pipeline on a full-sized dataset on the AWS cloud infrastructure. This ensures that the pipeline runs on AWS, has sensible resource allocation defaults set to run on real-world datasets, and permits the persistent storage of results to benchmark between pipeline releases and other analysis sources. The results obtained from the full-sized test can be viewed on the [nf-core website](https://nf-co.re/callingcards/results).
-
-## Pipeline summary
-
-1. Prepare Reads
-   1. Extract barcodes ([`UMItools`](https://github.com/CGATOxford/UMI-tools))
-   1. Trim, and reduce to only R1 depending on user input ([`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic))
-1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 1. Prepare the Genome
-   1. Samtools faidx and aligner indicies
-1. Alignment
-   1. One of: [`bwamem2`](https://github.com/bwa-mem2/bwa-mem2),[`bwa`](https://bio-bwa.sourceforge.net/bwa.shtml),[`bowtie2`](https://bowtie-bio.sourceforge.net/bowtie2/index.shtml),[`bowtie`](https://bowtie-bio.sourceforge.net/index.shtml)
-1. Process Alignments
-   1. Extract alignment QC metrics ([`Samtools`](https://www.htslib.org/, [Picard](https://gatk.broadinstitute.org/hc/en-us/articles/360037594031-CollectMultipleMetrics-Picard-), [RSeQC](https://rseqc.sourceforge.net/))
-   1. Quantify transposon hops and perform calling cards specific QC ([pycallingcards](https://github.com/cmatKhan/pycallingcards/tree/raw_processing/pycallingcards/raw_processing))
-   1. Peak calling and significance statistics ([pycallingcards](https://github.com/cmatKhan/pycallingcards/tree/raw_processing/pycallingcards/raw_processing))
-1. Present QC for raw read and alignment metrics ([`MultiQC`](http://multiqc.info/))
-1. Prepare the Genome
-   1. Samtools faidx and aligner indicies
-1. Alignment
-   1. One of: [`bwamem2`](https://github.com/bwa-mem2/bwa-mem2),[`bwa`](https://bio-bwa.sourceforge.net/bwa.shtml),[`bowtie2`](https://bowtie-bio.sourceforge.net/bowtie2/index.shtml),[`bowtie`](https://bowtie-bio.sourceforge.net/index.shtml)
-1. Process Alignments
-   1. Extract alignment QC metrics ([`Samtools`](https://www.htslib.org/, [Picard](https://gatk.broadinstitute.org/hc/en-us/articles/360037594031-CollectMultipleMetrics-Picard-), [RSeQC](https://rseqc.sourceforge.net/))
-   1. Quantify transposon hops and perform calling cards specific QC ([pycallingcards](https://github.com/cmatKhan/pycallingcards/tree/raw_processing/pycallingcards/raw_processing))
-   1. Peak calling and significance statistics ([pycallingcards](https://github.com/cmatKhan/pycallingcards/tree/raw_processing/pycallingcards/raw_processing))
-1. Present QC for raw read and alignment metrics ([`MultiQC`](http://multiqc.info/))
+   - optional masking with [bedtools](https://bedtools.readthedocs.io/en/latest/)
+   - Create aligner specific indicies. Available aligners:
+     - [bowtie](https://bowtie-bio.sourceforge.net/index.shtml)
+     - [`bowtie2`](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
+     - [`bwa`](http://bio-bwa.sourceforge.net/)
+     - [`bwamem2`](https://github.com/bwa-mem2/bwa-mem2)
+   - Create a genome index with [samtools](http://www.htslib.org/)
+2. Prepare the Reads
+   - Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
+   - Split reads
+     - Yeast: demultiplex by barcode ([`callingCardsTools`](https://github.com/cmatKhan/callingCardsTools))
+     - Mammals: split for parallel processing ([`seqkit`](https://bioinf.shenwei.me/seqkit/))
+       - Mammals: extract barcode to fastq read ID( [UMItools](https://umi-tools.readthedocs.io/en/latest/QUICK_START.html))
+   - Optionally trim reads ([Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic))])
+3. Align
+   - Any one of the aligners listed above in 'Prepare the Genome'
+   - Alignment QC ([`samtools`](http://www.htslib.org/),
+     [picard](https://broadinstitute.github.io/picard/),[rseqc](http://rseqc.sourceforge.net/))))
+4. Count Hops ([`callingCardsTools`](https://cmatkhan.github.io/callingCardsTools/))
+5. Present QC data ([`MultiQC`](http://multiqc.info/))
 
 ## Usage
 
-> **Note**
-> If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how
-> to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline)
-> with `-profile test` before running the workflow on actual data.
+:::note
+If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how
+to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline)
+with `-profile test` before running the workflow on actual data.
+:::
 
-Note that more detailed instructions are available in [usage](docs/usage.md).
+First, prepare a samplesheet with your input data according to your organism.
 
-1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=22.10.1`)
+A Yeast samplesheet will look like:
 
-1. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) (you can follow [this tutorial](https://singularity-tutorial.github.io/01-installation/)), [`Podman`](https://podman.io/), [`Shifter`](https://nersc.gitlab.io/development/shifter/how-to-use/) or [`Charliecloud`](https://hpc.github.io/charliecloud/) for full pipeline reproducibility.
+`yeast_samplesheet.csv`:
 
-<!-- _(you can use [`Conda`](https://conda.io/miniconda.html) both to install Nextflow itself and also to manage software within pipelines. Please only use it within pipelines as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_. -->
+```csv
+sample,fastq_1,fastq_2,barcode_details
+run_6177,run_6177_sample_R1.fastq.gz,run_6177_sample_R2.fastq.gz,run_6177_barcode_details.json
+```
 
-1. Testing with a minimal data set. This tests the installation only.
+Each row represents a multiplexed fastq file where the barcode_details.json file
+describes the barcodes which correspond to each transcription factor in the library.
 
-   ```bash
-     nextflow run nf-core/callingcards -profile test,YOURPROFILE --outdir <OUTDIR>
-   ```
+A mammals (human, mouse) samplesheet will look like:
 
-   Note that some form of configuration will be needed so that Nextflow knows how to fetch the required software. This is usually done in the form of a config profile (`test_human` and `singularity` in the example command above). You can chain multiple config profiles in a comma-separated string, as demonstrated.
+`mammals_samplesheet.csv`:
 
-   **Note**: this pipeline is not currently configured to run with conda.
+```csv
+sample,fastq_1,fastq_2,barcode_details
+midbrain_rep3,midbrain_rep3_R1.fastq.gz,,barcode_details.json
+```
 
--->
+Note that currently, the mammals workflow expects only R1 reads.
 
-1. Start running your own analysis!
+Now, you can run the pipeline using:
 
-   ```bash
-   nextflow run nf-core/callingcards \
-        -params-file params.json \
-        -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> \
-        # possibly more config settings for your environment
-        -c local.config
-   ```
+```bash
+nextflow run nf-core/callingcards \
+   -profile <docker/singularity/.../institute>,<default_yeast/default_mammals> \
+   --input samplesheet.csv \
+   --genome <igenomes_name (only required for mammals)> \
+   --outdir <OUTDIR>
+```
 
-The `params.json` file is described in [usage](docs/usage.md)
-Configuration is discussed in [Pipeline configuration](https://nf-co.re/usage/configuration) and
-in the [configuration section of the nextflow documentation](https://www.nextflow.io/docs/latest/config.html)
+Note that the [default_yeast](conf/default_yeast.config) and
+[default_mammals](conf/default_mammals.config) profiles are provided for
+convenience. You should check the parameters which these set to ensure that
+they are what you need for your data.
 
-## Documentation
+:::warning
+Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those
+provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
+see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
+:::
 
-To see the the results of a test run with a full size dataset refer to the [results](https://nf-co.re/callingcards/results) tab on the nf-core website pipeline page.
+For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/callingcards/usage) and the [parameter documentation](https://nf-co.re/callingcards/parameters).
+
+## Pipeline output
+
+To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/callingcards/results) tab on the nf-core website pipeline page.
 For more details about the output files and reports, please refer to the
 [output documentation](https://nf-co.re/callingcards/output).
 
@@ -98,17 +108,12 @@ For more details about the output files and reports, please refer to the
 nf-core/callingcards is implemented in nextflow by [Chase Mateusiak](https://orcid.org/0000-0002-2890-4242). It was adapted from scripts written by:
 
 - [Rob Mitra](https://orcid.org/0000-0002-2680-4264)
-- [Juanru Guo](https://orcid.org/0000-0001-8948-9700)
-  nf-core/callingcards is implemented in nextflow by [Chase Mateusiak](https://orcid.org/0000-0002-2890-4242). It was adapted from scripts written by:
-- [Rob Mitra](https://orcid.org/0000-0002-2680-4264)
-- [Juanru Guo](https://orcid.org/0000-0001-8948-9700)
 
 We thank the following people for their extensive assistance in the development of this pipeline:
 
-- [Joseph Dougherty](https://orcid.org/0000-0002-6385-3997)
 - [Allen Yen](https://orcid.org/0000-0002-3984-541X)
+- [Mari Gachechiladze](https://dbbs.wustl.edu/people/mari-gachechiladze-mstp-in-phd-training/)
 - [Joseph Dougherty](https://orcid.org/0000-0002-6385-3997)
-- [Allen Yen](https://orcid.org/0000-0002-3984-541X)
 
 ## Contributions and Support
 

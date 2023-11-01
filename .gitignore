@@ -6,6 +6,4 @@ results/
 testing/
 testing*
 *.pyc
-tmp/
-localtests/
-localtest/
+.vscode

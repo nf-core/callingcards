@@ -4,7 +4,6 @@
     nf-core/callingcards
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Github : https://github.com/nf-core/callingcards
-
     Website: https://nf-co.re/callingcards
     Slack  : https://nfcore.slack.com/channels/callingcards
 ----------------------------------------------------------------------------------------
@@ -22,7 +21,7 @@ params.gtf = WorkflowMain.getGenomeAttribute(params, 'gtf')
 
 if (params.datatype == 'yeast'){
     if(params.genome == 'R64-1-1'){
-
+        log.info"${projectDir}"
         params.regions_mask = "${projectDir}/assets/yeast/igenomes/R64-1-1/regions_mask.bed"
         log.info"Using default regions mask for yeast analysis: ${params.regions_mask}"
 
@@ -36,12 +35,6 @@ if (params.datatype == 'yeast'){
 }
 
 if (params.genome == 'GRCm38'){
-    if(params.aligner == 'bwa'){
-        params.bwa_index = WorkflowMain.getGenomeAttribute(params, 'bwa')
-    }
-}
-
-if (params.genome == 'GRCh38'){
     if(params.aligner == 'bwa'){
         params.bwa_index = WorkflowMain.getGenomeAttribute(params, 'bwa')
     }
@@ -83,6 +76,41 @@ if(!params.containsKey('bowtie2_index')){
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+include { validateParameters; paramsHelp } from 'plugin/nf-validation'
+
+// Print help message if needed
+if (params.help) {
+    def logo = NfcoreTemplate.logo(workflow, params.monochrome_logs)
+    def citation = '\n' + WorkflowMain.citation(workflow) + '\n'
+    def String command = "nextflow run ${workflow.manifest.name} --input samplesheet.csv --genome R64-1-1 -profile singularity"
+    log.info logo + paramsHelp(command) + citation + NfcoreTemplate.dashedLine(params.monochrome_logs)
+    System.exit(0)
+}
+
+// Validate input parameters
+if (params.validate_params) {
+    validateParameters()
+}
+
+// Validate some of the more idiosyncratic parameters specific to callingcards
+if (params.split_fastq_by_size != null && params.split_fastq_by_part != null){
+    exit 1, 'You have specified both `split_fastq_by_size` and `split_fastq_by_part`.' +
+    ' Please specify only one of these parameters. The other should be null.'
+}
+
+// Check that nonsensical combinations of parameters are not set
+if (params.additional_fasta && (params.bwa_index || params.bwamem2_index || params.bowtie_index || params.bowtie2_index)) {
+    exit 1, 'You have specified an additional fasta file and a genome index.' +
+    ' If the genome index is not equivalent to the main fasta file,' +
+    ' then omit the index and allow the pipeline to create it from' +
+    ' the concatenated fasta files.'
+}
+
+if (params.datatype == "mammals" && params.r1_bc_pattern == null){
+    exit 1, 'You have not specified a barcode pattern for mammalian data.' +
+    ' Please specify a barcode pattern using the `r1_bc_pattern` parameter.'
+}
+
 WorkflowMain.initialise(workflow, params, log)
 
 /*
@@ -91,8 +119,8 @@ WorkflowMain.initialise(workflow, params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { CALLINGCARDS_MAMMALS } from './workflows/callingcards_mammals'
 include { CALLINGCARDS_YEAST   } from './workflows/callingcards_yeast'
+include { CALLINGCARDS_MAMMALS } from './workflows/callingcards_mammals'
 
 //
 // WORKFLOW: Run main nf-core/callingcards analysis pipeline
@@ -116,13 +144,12 @@ workflow NFCORE_CALLINGCARDS_YEAST {
 // See: https://github.com/nf-core/rnaseq/issues/619
 //
 workflow {
-    if(params.datatype == 'mammal'){
+    if(params.datatype == 'mammals'){
         NFCORE_CALLINGCARDS_MAMMALS ()
     } else if (params.datatype == 'yeast'){
         NFCORE_CALLINGCARDS_YEAST ()
     } else {
-        exit 1, "Invalid datatype specified: ${params.datatype}. " +
-        "Valid options are 'mammals' or 'yeast'"
+        exit 1, "Invalid datatype specified: ${params.datatype}."
     }
 
 }

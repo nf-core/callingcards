@@ -21,7 +21,6 @@ workflow PROCESS_ALIGNMENTS {
     ch_genome_bed           // path(genome.bed)
     rseqc_modules           // [ val(module_list) ]
     ch_gtf                  // [ path(gtf) ]
-    biotypes_header_multiqc // [ val(header) ]
 
     main:
 
@@ -65,7 +64,7 @@ workflow PROCESS_ALIGNMENTS {
         .set{ ch_bam }
 
     // merge the passing and failing sets of bams into a single bam
-    SAMTOOLS_MERGE( ch_bam, fasta, fai.map{meta,fai -> fai} )
+    SAMTOOLS_MERGE( ch_bam, fasta.map{fasta -> ["", fasta]}, fai )
     ch_versions = ch_versions.mix(SAMTOOLS_MERGE.out.versions)
 
     // sort the merged bams
@@ -87,7 +86,7 @@ workflow PROCESS_ALIGNMENTS {
     // run samtools stats, flagstat and idxstats on the merged, sorted bams
     BAM_STATS_SAMTOOLS(
         ch_bam_bai,
-        fasta
+        fasta.map{it -> ['',it]}
     )
     ch_versions = ch_versions.mix(BAM_STATS_SAMTOOLS.out.versions)
 

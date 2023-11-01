@@ -2,347 +2,135 @@
 
 ## Introduction
 
-The `callingcards` pipeline a workflow for both yeast and mammals callingcards
-data. Both of these workflows executes similar steps. However, the details
-and output are not identical. If you are interested in details of the step
-or output, please ensure that you read the section corresponding to your
-organism.
+This document describes the output produced by the pipeline. Most of the plots
+are taken from the MultiQC report, which summarises results at the end of the
+pipeline.
 
-To run pre-configured tests on small data, suitable for a local computer,
-choose your workflow type based on data type:
+In the output directory of a given run of this pipeline, there will be a
+subdirectory for each sample in the [samplesheet](./usage.md#samplesheet-input)
+where the directory name is the sample name (first field in the samplesheet).
 
-- Yeast
-
-```bash
-nextflow run nf-core/callingcards -profile test, <docker/singularity/institute>
-```
-
-- Mammals
-
-```bash
-nextflow run nf-core/callingcards -profile test_mammals, <docker/singularity/institute>
-```
-
-If you want to see the complete output, then set the following:
-
-```
---save_genome_intermediate true --save_sequence_intermediate true --save_genome_intermediate true
-```
-
-### Output Overview
-
-The output directory structure for both the Yeast and Mammals workflows is very similar. Notably, the
-
-- [Preprocessing the Genome](#preprocessing-the-genome)
-
-  - [Genome Masking](#genome-masking-bedtools)
-
-  - [Adding additional sequences](#adding-additional-sequences-concatfasta)
-
-  - [gtf format to bed format](#gtf-format-to-bed-format-gtf2bed)
-
-  - [genome indexing](#aligner-indexing)
-
-- [Sample Specific Output](#sample-specific-output)
-
-  - [intermediate alignment results (selected aligner, samtools)](#alignment)
-
-  - [Hops](#hops)
-
-  - [QC modules (picard, rseqc, samtools)](#qc-modules-picard-rseqc-samtools)
-
-  - [MultiQC](#multiqc)
-
-- [Sequence](#sequence)
-
-- [Pipeline info](#pipeline-info)
-
-This pipeline provides two workflows, one to process yeast calling cards
-data, and one to process mammal (mouse and human) data. The steps and output
-are very similar, but there are subtle differences -- make sure that you are
-reading the correct section.
-
-### Preprocessing the Genome
-
-If `save_genome_intermediate` is set to true (false by default), then the
-`genome` subdirectory will be published in the `output_dir`.
-Here is an example of the `genome` output. This was generated from the `test`
-profile with `--save_genome_intermediate true`.
-
-Note: the execution of any given run will be faster if the completely prepared
-genome is passed through the appropriate parameters at runtime. If you don't
-already have masked genome fasta file with the additional sequences added
-(again, for yeast. For mammals this is not necessary), and the selected
-aligner's index of this augmented genome, then run the pipeline once with
-`--save_genome_intermediate true` and save the result for future use.
-
-```bash
-genome
-├── bedtools
-│   └── regions_mask.fa
-├── bwamem2
-│   └── bwamem2
-│       ├── concat.fasta.0123
-│       ...
-├── concatfasta
-│   └── concat.fasta
-├── gtf2bed
-│   └── genes.bed
-└── samtools
-    └── concat.fasta.fai
-```
-
-#### Genome Masking (bedtools)
-
-A typical and recommended part of the yeast workflow, but not the mammal
-workflow. When the user provides the `regions_mask` parameter (if you use
---genome R64-1-1 for yeast, this is set automatically by the pipeline),
-the genome is hard masked by `bedtools maskfasta`.
-
-#### Aligner indexing
-
-For the chosen aligner, if that aligner's index for the genome.
-
-#### Adding Additional Sequences (concatfasta)
-
-A typical and recommended part of the yeast workfflow, but nto the mammal
-workflow.
-
-#### GTF format to Bed Format (gtf2bed)
-
-This simply transforms the input GTF file to bed format.
-
-#### Genome indexing (samtools)
-
-This is the indexed genome -- indexing is performed after masking and,
-critically, appending any additional sequences.
-
-### Sample Specific Output
-
-#### Alignment
-
-After preprocessing the genome and raw reads, the processed reads are then
-aligned to the processed genome. If `save_alignment_intermediate` is set to
-false (false), then no `alignment` subdirectory will be created. Setting
-`save_alignment_intermediate` to `true` would only be useful for debugging
-purposes. An example of the output structure is:
-
-```bash
-alignment
-├── bwamem2
-│   ├── run_6177_T1_DAL80.bam
-│   ├── ...
-└── samtools
-    ├── run_6177_T1_DAL80.bam.bai
-    ├── ...
-```
-
-The alignment files which result from this step are input into the
-[callingCardsTools](https://github.com/cmatKhan/callingCardsTools) counting
-and sorting function, which determines if a read should be counted as a hop
-and partitions the alignments into `passing` and `failing` bam files. It is
-these partitioned files which are worth saving, not the intermediate
-alignment files.
-
-#### Hops
-
-The yeast and mammals `hops` subdirectories contain slightly different QC
-files, and contain slightly different intermediate subdirectories. It is
-recommended that `save_alignment_intermediate` and `save_count_intermediate`
-are both set to false (default) and not set to true except for debugging.
-If you were to set both to true, you would see the following output:
-
-**Yeast**
-
-```bash
-results/<sample>/hops
-├── run_6177_T1_DAL80_failing_tagged.bam
-├── run_6177_T1_DAL80_failing_tagged.bam.bai
-├── run_6177_T1_DAL80_passing_tagged.bam
-├── run_6177_T1_DAL80_passing_tagged.bam.bai
-├── run_6177_T1_DAL80.qbed
-├── run_6177_T1_DAL80_summary.tsv
-├── ...
-├── picard
-│   ├── run_6177_T1_DAL80_failing_tagged.CollectMultipleMetrics.alignment_summary_metrics
-│   ├── ...
-├── rseqc
-│   ├── run_6177_T1_DAL80_failing_tagged.read_distribution.txt
-│   ├── ...
-└── samtools
-    ├── run_6177_T1_DAL80_failing_tagged.flagstat
-    ├── run_6177_T1_DAL80_passing_tagged.flagstat
-    ├── ...
-
-```
-
-- `*.passing/failing.bam(.bai)`
-
-  - These are the alignment records, paritioned into those alignments which are
-    counted as hops (passing) and those which are not (failing). the `.bai`
-    file is the bam index
-
-- `*.qbed`
-
-  - A qbed file is a modified bed format file which describes Calling Cards
-    transposon insertions.
-    [See here for more information](https://cmatkhan.github.io/callingCardsTools/file_format_specs/qbed/).
-
-- `*.summary.tsv`
-
-  - This is the yeast alignment/hops level QC summary. Here is an example:
-
-  ```raw
-  status_decomp	count
-  MAPQ	7
-  MAPQ, FIVE_PRIME_CLIP	1
-  NO_STATUS	17
-  UNMAPPED	6
-  ```
-
-  where the first column is the quality status of a given alignment.
-  `NO_STATUS` means passing, counted alignment. The second column are
-  the number of alignment records in each category. Note that between any
-  given sample, the levels of the `status_decomp` column may differ depending
-  on how the reads classify.
-
-**Mammals**
-
-```bash
-results/<sample>/hops
-├── human_AY53-1_50_T1_passing_merged_sorted.bam
-├── human_AY53-1_50_T1_passing_merged_sorted.bam.bai
-├── human_AY53-1_50_T1_failing_merged_sorted.bam
-├── human_AY53-1_50_T1_failing_merged_sorted.bam.bai
-├── human_AY53-1_50_T1_aln_summary.tsv
-├── human_AY53-1_50_T1_barcode_qc.tsv
-├── human_AY53-1_50_T1.qbed
-├── human_AY53-1_50_T1_srt_count.tsv
-├── count
-│   ├── ...
-├── picard
-│   ├── ...
-└── samtools
-    ├── ...
-
-```
-
-See the yeast hops section for an explanation of the `.bam(.bai)` and
-`.qbed` files. Additionally, the `*_aln_summary.tsv` files are the same as
-the yeast `summary.tsv` files -- see the yeast section above.
-
-However, `srt_count.tsv` is unique to the mammals pipeline -- here is an
-example of this file:
+For example, if you are running **mammals** data and your samplesheet has two
+samples, like so:
 
 ```raw
-srt_type	count
-single_srt	101
-multi_srt	0
+sample,fastq_1,fastq_2,barcode_details
+AAV9_cortex,data/AAV9_1-1_cortex_L004_R1.fastq.gz,,barcode_details.json
+AAV9_hindbrain,data/AAV9_1-1_hindbrain_L004_R1.fastq.gz,,barcode_details.json
 ```
 
-The first column,`srt_type` is either `single_srt` or `multi_srt`. The second
-column `count`, describes how many, of the passing hops, of the insertions
-have a single `srt` sequence, and how many have multiple `srt` sequences.
+Then the output directory would have the following structure:
 
-##### QC modules (picard, rseqc, samtools)
+```raw
+example_results/
+├── AAV9_cortex
+│   ├── hops
+│   └── sequence
+├── AAV9_hindbrain
+│   ├── hops
+│   └── sequence
+├── multiqc
+└── pipeline_info
 
-These are standard sequencing QC packages and the results are compiled by
-MultiQC. See the [MultiQC](#multiqc) section for a discussion of how to
-interpret these results for CallingCards experiments.
-
-### Sequence
-
-This subdirectory stores the result of the preprocessing of the raw reads. The
-yeast and mammals workflows differ significantly in this case.
-
-The **yeast** sequence directory looks like this:
-
-```bash
-sequence
-├── run_6177_T1_null_r1_primer_summary.csv
-├── run_6177_T1_null_r2_transposon_summary.csv
-├── concatfastq
-│   ├── run_6177_T1_DAL80_R1_concat.fastq
-│   ├── run_6177_T1_DAL80_R2_concat.fastq
-│   ├── ...
-├── demultiplex
-│   ├── barcode_qc_run_6177_T1_1.pickle
-│   ├── DAL80_run_6177_T1_1_R1.fq
-│   ├── DAL80_run_6177_T1_1_R2.fq
-│   ├── ...
-├── fastqcdemux
-│   ├── run_6177_T1_DAL80_1_fastqc.html
-│   ├── run_6177_T1_DAL80_1_fastqc.zip
-│   ├── ...
-├── fastqcraw
-│   ├── ...
-└── trimmomatic
-    ├── ..
 ```
 
-If `save_sequence_intermediate` is false (default, and recommended unless
-debugging) then the output will be the summary files, and the fastqc files.
+If you are running **yeast** data, then the samplesheet would look the same,
+except fastq_2 must be present. The output directory will be structured
+similarly, except that within each sample subdirectory, there will be multiple
+qbeds/qc files for each of the TFs included in the multiplexed library. Mammals
+libraries, on the other hand, are not multiplexed and contain data for only 1
+TF.
+
+For either `datatype`, you can include the parameters
+`--save_genome_intermediate`, `--save_sequence_intermediate` and/or
+`--save_alignment_intermeidate` to save the intermediate files generated at
+each processing stage.
+
+The directories listed below will be created in the results directory after the
+pipeline has finished. All paths are relative to the top-level results directory.
+
+## Pipeline overview
+
+The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
+
+1. Prepare the Genome
+   - [Mask Fasta](#mask-genome)
+   - [Concat Fasta](#concatenate-additional-sequences)
+   - [GTF2BED](#gtf2bed)
+   - [Aligner Index](#aligner-index)
+   - [Genome Index](#genome-index)
+2. Prepare the Reads
+   - [FastQC](#fastqc)
+   - [Divide Fastq](#divide-fastq)
+   - [UMITools Extract](#umitools-extract) (mammals only)
+   - [Demultiplex](#demultiplex) (yeast only)
+   - [Concat Fastqs](#concat-fastq) (yeast only)
+   - [Concat QC](#concat-qc) (for mammals, this occurs in the Align step)
+   - [Trimmomatic](#trimmomatic)
+3. Align
+   - [Align](#align)
+4. Count Hops
+   - [Count Hops](#count-hops)
+   - [Alignment QC and Metrics](#alignment-metrics)
+5. [Present QC data](#multiqc)
+6. [Pipeline information](#pipeline-information)
+
+### Mask Genome
+
+This step does not output, except in the `work-dir`.
+However, if a bed file is provided to the `regions_mask` parameter, then it
+will be used to mask the genome with `bedtools maskfasta`. The masked genome
+will be used for the rest of the pipeline.
+
+### Concatenate Additional Sequences
+
+This step does not output, except in the `work-dir`.
+However, if a fasta file is provided to the the `additional_sequence`
+parameter, it will be appended to the (possibly masked) genome and used for all
+subsequent steps.
+
+### GTF2BED
+
+Translation of the gtf file to a bed file.
+This is only output if `save_genome_intermediate` is `true`
 
 <details markdown="1">
-<summary>Summary Files Description</summary>
+<summary>Output files</summary>
 
-- `*_primer_summary.csv`
-
-  - This is a csv file which tallies the instances of the R2 transposon by
-    R1 primer sequence (these two sequences together form the barcode which
-    relates a transcription factor to a given read). This will look something
-    like:
-
-  ```raw
-  tf,r1_primer_seq,r1_transposon_edit_dist,r2_transposon_edit_dist,restriction_ezyme,count
-  MET31,TGATA,11,4,*,1
-  INO2x1,CCTGC,13,7,*,1
-  DAL80,CAACG,0,0,HinP1I,14
-  DAL80,CAACG,0,0,*,2
-  DAL80,CAACG,0,0,TaqAI,1
-  DAL80,CAACG,0,0,Hpall,14
-  DAL80,CAACG,0,7,TaqAI,1
-  DAL80,CAACG,0,6,TaqAI,1
-  DAL80,CAACG,0,6,HinP1I,1
-  ```
-
-- `*_transposon_summary.csv`
-  - This is similar to the `_primer_summary.csv`, but in the reverse direction.
-    This file instead tallies, for a given R2 transposon sequence, the number of
-    `r1_primer_seq`s.
+- `genome/gtf2bed`
+  - `<gtf_name>.bed`: GTF file in bed format
 
 </details>
 
-`demultiplex` stores the results of the partitioning of the reads by barcode
-and `trimmomatic` stores the demultiplexed, trimmed reads. However, only
-the `fastqc` directories will be saved if `save_sequence_intermediate` is
-`false`, which is the default.
+### Aligner Index
 
-The **mammals** directory looks like this:
-
-```bash
-sequence/
-├── fastqc
-│   ├── human_AY53-1_50_T1_fastqc.html
-│   └── human_AY53-1_50_T1_fastqc.zip
-├── trimmomatic
-│   ├── human_AY53-1_50_T1_1_barcoded_cropped.log
-│   ├── human_AY53-1_50_T1_1_barcoded_cropped.SE.paired.trim.fastq.gz
-│   ├── human_AY53-1_50_T1_1_barcoded_cropped.summary
-│   ├── ...
-└── umitools
-    ├── human_AY53-1_50_T1_1_barcoded.umi_extract.fastq.gz
-    ├── human_AY53-1_50_T1_1_barcoded.umi_extract.log
-    ├── ...
-```
-
-where only `fastqc` will be present if `save_sequence_intermediate` is set to
-`false` (default)
+The index produced by the aligner of your choice. This will only be saved if
+`save_genome_intermediate` is true
 
 <details markdown="1">
-<summary>FastQC Output Description</summary>
+<summary>Output files</summary>
 
-[FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your sequenced reads. It provides information about the quality score distribution across your reads, per base sequence content (%A/T/G/C), adapter contamination and overrepresented sequences. For further reading and documentation see the [FastQC help pages](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
+- `genome/<aligner>`
+  - `<aligner index output>`: The output of the aligner index command
+
+</details>
+
+### Genome Index
+
+Samtools index of the fasta file (after appending any additional sequences)
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `genome/samtools`
+  - `<genome>.fa[asta].fai`: Genome index (includes additional sequences, if they exist).
+
+</details>
+
+### FastQC
+
+<details markdown="1">
+<summary>Output files</summary>
 
 - `fastqc/`
   - `*_fastqc.html`: FastQC report containing quality metrics.
@@ -350,11 +138,22 @@ where only `fastqc` will be present if `save_sequence_intermediate` is set to
 
 </details>
 
-<details markdown="1">
-<summary>UMITools Extract Output Description</summary>
+[FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your sequenced reads. It provides information about the quality score distribution across your reads, per base sequence content (%A/T/G/C), adapter contamination and overrepresented sequences. For further reading and documentation see the [FastQC help pages](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
 
-[UMItools extract](https://github.com/CGATOxford/UMI-tools) is used to extract barcode and other CallingCards specific sequences from
-single or paired-end reads.
+> **NB:** The yeast workflow runs FastQC both before and after processing (including demultiplexing) the reads. The
+> mammalian workflow runs FastQC only on un-processed reads
+
+### Divide Fastq
+
+seqkit split2 is used to divide each of the samples' fastq files into parts
+for parallel processing. For the yeast pipeline, these parts are concatenated
+back together by the respective TFs while for mammals, the divided parts are
+aligned and processed in parallel
+
+### UMItools Extract
+
+<details markdown="1">
+<summary>Output files</summary>
 
 - `umitools/`
 
@@ -385,24 +184,199 @@ single or paired-end reads.
 
 </details>
 
-<details markdown="1">
-<summary>Trimmomatic Output Description</summary>
+[UMItools extract](https://github.com/CGATOxford/UMI-tools) is used to extract barcode and other CallingCards specific sequences from
+single or paired-end reads.
 
-[Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic) is used to trim reads after extracting known non-genomic
-Calling Cards specific sequence
+### Demultiplex
+
+This step is only run for the yeast pipeline. It calls the
+[callingCardsTools](https://github.com/cmatKhan/callingCardsTools) utility
+`parse fastq` and uses the `barcod_details` json file to demultiplex the reads
+according to the TF barcodes. This step will typically be performed on
+split fastq files (for parallel processing) and not output unless
+`save_sequence_itermediate` is set.
+
+### Concat Fastq
+
+This step is only run for the yeast pipeline. It concatenates the splits of
+each demultiplexed TF fastq file so that there is a single fastq file for each
+TF for each sample.
+
+### Concat QC
+
+This is performed in both the yeast and mammals workflows, but at different
+points. For yeast, this is performed in the
+[Prepare Reads](../subworkflows/local/yeast/prepare_reads.nf) subworkflow while
+in mammals it is performed after alignment in the
+[Process Alignment](../subworkflows/local/mammals/process_alignments.nf)
+subworkflow.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `sequence/<sample>`
+  - `fastqcdemux`: The trimmed fastq file
+  - `fastqcraw`: Log file generated by tyrimmomatic
+  - `*_r1_primer_summary`: Given a correct R1 barcode, this file describes how many reads go to each R2 barcode tallied by edit distance. So, the entry
+    `MET31,TGATA,11,4,*,1` means that for the MET31 R1 sequence `TGATA` which has an R1 transposon sequence
+    with an edit distance of 11 and R2 TF barcode sequence
+    with an edit distance of 4 and and unknown restriction
+    enzyme, there was 1 read.
+  - `*_r2_transposon_summary.csv`: Similar to above, but
+    rather than tallying by correct R1 sequences, this tallies by correct R2 TF barcode sequences.
+
+</details>
+
+### Trimmomatic
+
+<details markdown="1">
+<summary>Output files</summary>
 
 - `trimmomatic/`
-  - `*.fastq.gz`: The fastq file, after the [`UMITools extract`](#umi-tools-extract)
+  - `*.fastq.gz`: The trimmed fastq file
   - `*.log`: Log file generated by tyrimmomatic
 
 </details>
 
+[Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic) is used to trim reads after extracting known non-genomic
+Calling Cards specific sequence
+
+### Align
+
+The user may select any one of the following:
+
+- [bwa aln](https://github.com/lh3/bwa)
+- [bwa mem2](https://github.com/bwa-mem2/bwa-mem2)
+- [bowtie](https://bowtie-bio.sourceforge.net/index.shtml)
+- [bowtie2](https://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
+
+If `save_intermediate` is set, and the selected Aligner generates an index,
+the index will be saved at the main level of the `outdir` in a directory called
+`genome`. In each sample subdirectory, there will also be a directory
+named by the name of the selected aligner which will store the aligner's output.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `genome/`
+
+  - `<ALIGNER>`: this will store the selected aligners index, if `save_intermediate` is set.
+
+- `<ALIGNER>/`
+  - `<SAMPLE>.sorted.bam`: Coordinate sorted alignment file generated by the user-selected aligner
+  - `<SAMPLE>.sorted.bam.bai`: the BAI index for the alignment file
+  </details>
+
+### Count Hops
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `hops/`
+  - `*_passing.bam/.bai`: the subset of alignments which are considered passing, countable hops,
+    and its BAI index
+  - `*_failing.bam/.bai`: the subset of alignments which are considered uncountable
+  - `*.qbed`: A qBed format file which quantifies the number of hops at a given
+    coordinate in the genome
+  - `*_summary.tsv`: A tally of the number of reads which passed and failed by failure status
+  - `*_barcode_qc.tsv`: (mammals only) A tally of the number of reads by barcode components
+  - `*_srt_count.tsv`: (mammals only) A tally of reads with a single and multi SRT sequence
+
+</details>
+
+### Alignment Metrics
+
+Picard, RSeQC and Samtools provide alignment level quality control metrics.
+Qualifying alignments are counted as 'hops' of a given transcription factor
+and those hops are quantified in a qBed file. Hop level QC metrics are also
+generated.
+
+#### Picard
+
+Picard CollectMultipleMetrics gathers multiple QC metrics from alignments files. These are performed on
+the post-processed alignments files, after they have
+been partitioned into passing and failing alignments.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `hops/picard/`
+  - `*.alignment_summary_metrics`
+  - `.base_distribution_by_cycle_metrics/.pdf`
+  - `*.quality_by_cycle_metrics/.pdf`
+  - `*quality_distribution_metrics/.pdf`
+  - `*.read_length_histogram.pdf`
+
+</details>
+
+#### SAMtools
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `alignment/`
+  - `<SAMPLE>.sorted.bam.bai`: the BAI index for the alignment file
+- `hops/samtools/`
+  - SAMtools `<SAMPLE>.sorted.bam.flagstat`, `<SAMPLE>.sorted.bam.idxstats` and `<SAMPLE>.sorted.bam.stats` files generated from the alignment files.
+
+</details>
+
+The original BAM files generated by the selected alignment algorithm are further processed with [SAMtools](http://samtools.sourceforge.net/) to sort them by coordinate, for indexing, as well as to generate read mapping statistics.
+
+#### RSeQC
+
+[RSeQC](<(http://rseqc.sourceforge.net/)>) is a package of scripts designed to evaluate the quality of RNA-seq data. This pipeline runs several, but not all RSeQC scripts. You can tweak the supported scripts you would like to run by adjusting the `--rseqc_modules` parameter which by default will run all of the following: `bam_stat.py`, `inner_distance.py`, `infer_experiment.py`, `junction_annotation.py`, `junction_saturation.py`,`read_distribution.py` and `read_duplication.py`.
+
+The majority of RSeQC scripts generate output files which can be plotted and summarised in the MultiQC report.
+
+##### Infer experiment
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `hops/rseqc`
+  - `*.infer_experiment.txt`: File containing fraction of reads mapping to given strandedness configurations.
+
+</details>
+
+A number of RSeQC modules are available. Only the read distribution
+
+RSeQC documentation: [infer_experiment.py](http://rseqc.sourceforge.net)
+
+![MultiQC - Strand check table](images/mqc_strand_check.png)
+
+##### Read distribution
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<ALIGNER>/rseqc/read_distribution/`
+  - `*.read_distribution.txt`: File containing fraction of reads mapping to genome feature e.g. CDS exon, 5’UTR exon, 3’ UTR exon, Intron, Intergenic regions etc.
+
+</details>
+
+This tool calculates how mapped reads are distributed over genomic features. A good result for a standard RNA-seq experiments is generally to have as many exonic reads as possible (`CDS_Exons`). A large amount of intronic reads could be indicative of DNA contamination in your sample but may be expected for a total RNA preparation.
+
+RSeQC documentation: [read_distribution.py](http://rseqc.sourceforge.net/#read-distribution-py)
+
+##### BAM stat
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<ALIGNER>/rseqc/bam_stat/`
+  - `*.bam_stat.txt`: Mapping statistics for the BAM file.
+
+</details>
+
+This script gives numerous statistics about the aligned BAM files.
+
+MultiQC plots each of these statistics in a dot plot. Each sample in the
+project is a dot - hover to see the sample highlighted across all fields.
+
+RSeQC documentation: [bam_stat.py](http://rseqc.sourceforge.net/#bam-stat-py)
 
 ### MultiQC
-
-[MultiQC](http://multiqc.info) is a visualization tool that generates a single HTML report summarising all samples in your project. Most of the pipeline QC results are visualised in the report and further statistics are available in the report data directory.
-
-Results generated by MultiQC collate pipeline QC from supported tools e.g. FastQC. The pipeline has special steps which also allow the software versions to be reported in the MultiQC output for future traceability. For more information about how to use MultiQC reports, see <http://multiqc.info>.
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -414,28 +388,20 @@ Results generated by MultiQC collate pipeline QC from supported tools e.g. FastQ
 
 </details>
 
-## Preprocessing Raw Reads
+[MultiQC](http://multiqc.info) is a visualization tool that generates a single HTML report summarising all samples in your project. Most of the pipeline QC results are visualised in the report and further statistics are available in the report data directory.
 
-![MultiQC - FastQC sequence counts plot](images/mqc_fastqc_counts.png)
+Results generated by MultiQC collate pipeline QC from supported tools e.g. FastQC. The pipeline has special steps which also allow the software versions to be reported in the MultiQC output for future traceability. For more information about how to use MultiQC reports, see <http://multiqc.info>.
 
-### Pipeline Info
+### Pipeline information
 
-[Nextflow](https://www.nextflow.io/docs/latest/tracing.html) provides excellent
-functionality for generating various reports relevant to the running and
-execution of the pipeline. This will allow you to troubleshoot errors with the
-running of the pipeline, and also provide you with other information such as
-launch commands, run times and resource usage.
+<details markdown="1">
+<summary>Output files</summary>
 
-```bash
-pipeline_info
-├── execution_report_2023-05-21_13-43-36.html
-├── execution_timeline_2023-05-21_13-43-36.html
-├── execution_trace_2023-05-21_13-43-36.txt
-├── pipeline_dag_2023-05-21_13-43-36.html
-├── samplesheet.valid.csv
-└── software_versions.yml
-```
+- `pipeline_info/`
+  - Reports generated by Nextflow: `execution_report.html`, `execution_timeline.html`, `execution_trace.txt` and `pipeline_dag.dot`/`pipeline_dag.svg`.
+  - Reports generated by the pipeline: `pipeline_report.html`, `pipeline_report.txt` and `software_versions.yml`. The `pipeline_report*` files will only be present if the `--email` / `--email_on_fail` parameter's are used when running the pipeline.
+  - Reformatted samplesheet files used as input to the pipeline: `samplesheet.valid.csv`.
 
-The `execution_report_...` is of particular interest if you wish to tune the
-resource requests.
+</details>
 
+[Nextflow](https://www.nextflow.io/docs/latest/tracing.html) provides excellent functionality for generating various reports relevant to the running and execution of the pipeline. This will allow you to troubleshoot errors with the running of the pipeline, and also provide you with other information such as launch commands, run times and resource usage.
