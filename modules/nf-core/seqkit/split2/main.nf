@@ -2,11 +2,11 @@ process SEQKIT_SPLIT2 {
     tag "$meta.id"
     label 'process_medium'
 
-    conda 'modules/nf-core/seqkit/split2/environment.yml'
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/seqkit%3A2.5.1--h9ee0642_0' :
         'biocontainers/seqkit==2.5.1--h9ee0642_0' }"
-        
+
     input:
     tuple val(meta), path(reads)
 

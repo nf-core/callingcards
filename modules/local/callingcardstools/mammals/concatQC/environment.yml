@@ -3,4 +3,4 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bioconda::seqkit=2.5.1
+  - bioconda::callingcardstools=1.2.0
