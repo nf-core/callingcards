@@ -148,8 +148,6 @@ workflow {
         NFCORE_CALLINGCARDS_MAMMALS ()
     } else if (params.datatype == 'yeast'){
         NFCORE_CALLINGCARDS_YEAST ()
-    } else {
-        exit 1, "Invalid datatype specified: ${params.datatype}."
     }
 
 }
