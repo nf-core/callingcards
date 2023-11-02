@@ -110,7 +110,7 @@ workflow CALLINGCARDS_MAMMALS {
     ch_samtools_idxstats = Channel.empty()
 
     //
-    // VALIDATE AND PARSE INPUTS
+    // Validate and parse samplesheet
     //
     Channel.fromSamplesheet("input")
         .multiMap{ sample, fastq_1, fastq_2, barcode_details ->
@@ -127,15 +127,6 @@ workflow CALLINGCARDS_MAMMALS {
     //
     // SUBWORKFLOW_2: Index the genome in various ways
     //
-    // input: fasta file (genome), a regions mask (bed format), additional
-    //        sequences (fasta format) to append to the genome after masking,
-    //        and a gtf file
-    // output: fasta (masked fasta), fai (fasta index),
-    //         genome_bed (gtf in bed format), bwamem2_index (bwa mem2 index),
-    //         bwa_index (bwa aln index), bowtie_index (bowtie index),
-    //         bowtie2_index (bowtie2 index), versions
-    //         NOTE: the aligner index channels will be empty except for the
-    //         aligner specified in params.aligner
     PREPARE_GENOME(
         ch_fasta,
         ch_regions_mask,
@@ -146,16 +137,7 @@ workflow CALLINGCARDS_MAMMALS {
 
     //
     // SUBWORKFLOW_3: run sequencer level QC, extract barcodes and trim
-    // input: [ val(meta), [ path(fastq1), path(fastq2) ] ] where the reads
-    //        list may be [ path(fastq1) ] if the input is single-end
-    // output: 'reads' with structure [ val(meta), [ path(fastq1),
-    //                                               path(fastq2) ] ]
-    //         'fastqc_html' with structure [ val(meta), path(fastqc_html) ]
-    //         'fastqc_zip' with structure [ val(meta), path(fastqc_zip) ]
-    //         'umi_log' with structure [ val(meta), path(umi_log) ]
-    //         'trimmomatic_log' with structure [ val(meta),
-    //                                            path(trimmomatic_log) ]
-    //         'versions' with structure [ path(versions) ]
+    //
     PREPARE_READS (
         ch_input.reads
     )
@@ -163,11 +145,7 @@ workflow CALLINGCARDS_MAMMALS {
 
     //
     // SUBWORKFLOW_4: align reads
-    // input: post-processed reads. note that the fastq have been split into
-    //        chunks based on params.split_fastq_by_[size/part]. the metadata
-    //        includes a key value pair split: <split_number>, eg split: 1
-    // output: channel 'bam' with structure [ val(meta), path(bam), path(bai) ]
-    //         channel 'versions' with structure [ path(versions) ]
+    //
     ALIGN (
         PREPARE_READS.out.reads,
         PREPARE_GENOME.out.bwamem2_index,
@@ -192,18 +170,7 @@ workflow CALLINGCARDS_MAMMALS {
 
     //
     // SUBWORKFLOW_5: process the alignnment into a qbed file
-    // input: channel 'bam' with structure [ val(meta), path(bam),
-    //                                       path(bai), path(barcode_details) ],
-    //       'fasta' (genome fasta), 'genome_bed' (genome bed),
-    //       'rseqc_modules' (list of rseqc modules to run),
-    //       'fai' [val(meta), path(fai)], 'gtf' (gtf file),
-    //       'biotypes_header_multiqc' (biotypes header for multiqc)
-    // output: All QC outputs have structure [ val(meta), path(file) ]
-    //         'samtools_stats', 'samtools_flatstat', 'samtools_idxstats',
-    //         'picard_qc', 'rseqc_bamstat', 'rseqc_infer_experiment',
-    //         'rseqc_inner_distance', 'rseqc_read_distribution',
-    //         'rseqc_read_duplication', 'rseqc_tin',
-    //         'versions'
+    //
     PROCESS_ALIGNMENTS (
         ch_aln_with_details,
         ch_fasta,

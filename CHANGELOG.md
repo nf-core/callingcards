@@ -5,8 +5,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v1.0.0 - 2023-10-31
 
-Official release of nf-core/callingcards.
-
 ### `Fixed`
 
 - workflow `datatype` option for mammasl workflow corrected to `mammals`
@@ -21,12 +19,4 @@ Official release of nf-core/callingcards.
 
 ## v0.0.0dev - 2023-01-01
 
-Initial release of nf-core/callingcards, created with the [nf-core](https://nf-co.re/) template.
-
-### `Added`
-
-### `Fixed`
-
-### `Dependencies`
-
-### `Deprecated`
+Initial beta version
