@@ -66,7 +66,7 @@ may be found [here](https://cmatkhan.github.io/callingCardsTools/file_format_spe
 The typical command for running the mammals workflow is as follows:
 
 ```bash
-nextflow run callingcards/main.nf \
+nextflow run nf-core/callingcards \
     -profile default_mammals,singularity \
     --input /path/to/your_samplesheet.csv \
     --fasta /path/to/genome.fa \
@@ -77,7 +77,7 @@ nextflow run callingcards/main.nf \
 A typical command for running the yeast workflow is as follows:
 
 ```bash
-nextflow run callingcards/main.nf \
+nextflow run nf-core/callingcards \
     -profile default_yeast,singularity \
     --input /path/to/your_samplesheet.csv \
     --outdir results

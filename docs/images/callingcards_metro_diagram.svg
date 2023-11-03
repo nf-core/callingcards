@@ -29,7 +29,7 @@
      inkscape:document-units="mm"
      showgrid="true"
      inkscape:zoom="6.2674937"
-     inkscape:cx="622.73696"
+     inkscape:cx="518.86769"
      inkscape:cy="122.77635"
      inkscape:window-width="1848"
      inkscape:window-height="1016"
@@ -169,7 +169,7 @@
        height="176.41621"
        x="37.089237"
        y="16.79253"
-       inkscape:export-filename="../801be73d/callingcards_metro_diagram_rounded.png"
+       inkscape:export-filename="../69634a67/callingcards_metro_diagram.png"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96" /><text
        xml:space="preserve"
@@ -770,9 +770,9 @@
        y="0"><tspan
          x="1068.6987"
          y="393.9082"
-         id="tspan10555"><tspan
+         id="tspan11060"><tspan
            style="font-weight:bold;font-size:28.516px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro, Bold'"
-           id="tspan10553">Demultiplex</tspan></tspan></text><text
+           id="tspan11058">Demultiplex</tspan></tspan></text><text
        xml:space="preserve"
        transform="matrix(0.1168588,-0.12454325,0.12454325,0.1168588,-70.626332,190.72555)"
        id="text1450-73-0"
@@ -781,9 +781,9 @@
        y="0"><tspan
          x="1099.2006"
          y="396.36864"
-         id="tspan10559"><tspan
+         id="tspan11064"><tspan
            style="font-weight:bold;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro, Bold'"
-           id="tspan10557">Yeast</tspan></tspan></text><text
+           id="tspan11062">Yeast</tspan></tspan></text><text
        xml:space="preserve"
        transform="matrix(0.11918147,0.12232244,-0.12232244,0.11918147,22.31552,-49.798054)"
        id="text1450-73-0-0"
@@ -792,9 +792,9 @@
        y="0"><tspan
          x="1059.8007"
          y="396.36864"
-         id="tspan10563"><tspan
+         id="tspan11068"><tspan
            style="font-weight:bold;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro, Bold'"
-           id="tspan10561">Mammals</tspan></tspan></text><g
+           id="tspan11066">Mammals</tspan></tspan></text><g
        id="g1828-8"
        transform="translate(29.815944,75.617986)"><text
          xml:space="preserve"
@@ -805,9 +805,9 @@
          y="0"><tspan
            x="1089.8433"
            y="393.9082"
-           id="tspan10567"><tspan
+           id="tspan11072"><tspan
              style="font-weight:bold;font-size:28.516px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro, Bold'"
-             id="tspan10565">UMITools</tspan></tspan></text></g><text
+             id="tspan11070">UMITools</tspan></tspan></text></g><text
        xml:space="preserve"
        transform="matrix(0.11204156,-0.1288941,0.1288941,0.11204156,-26.004456,198.63855)"
        id="text1450-7"
@@ -816,7 +816,7 @@
        y="0"><tspan
          x="1105.4557"
          y="385.5016"
-         id="tspan10569">fastQC</tspan></text><text
+         id="tspan11074">fastQC</tspan></text><text
        xml:space="preserve"
        transform="matrix(0.11204156,-0.1288941,0.1288941,0.11204156,-27.06279,264.78511)"
        id="text1450-7-1"
@@ -825,7 +825,7 @@
        y="0"><tspan
          x="1105.4557"
          y="385.5016"
-         id="tspan10571">fastQC</tspan></text><text
+         id="tspan11076">fastQC</tspan></text><text
        xml:space="preserve"
        transform="matrix(0.11204156,-0.1288941,0.1288941,0.11204156,-14.544206,267.33078)"
        id="text1450-7-1-1"
@@ -834,7 +834,7 @@
        y="0"><tspan
          x="1080.2477"
          y="385.5016"
-         id="tspan10573">splitReads</tspan></text><text
+         id="tspan11078">splitReads</tspan></text><text
        xml:space="preserve"
        transform="matrix(0.11204156,-0.1288941,0.1288941,0.11204156,33.262232,198.63857)"
        id="text1450-7-4"
@@ -843,7 +843,7 @@
        y="0"><tspan
          x="1105.4557"
          y="385.5016"
-         id="tspan10575">fastQC</tspan></text><text
+         id="tspan11080">fastQC</tspan></text><text
        xml:space="preserve"
        transform="matrix(0.11204156,-0.12889299,0.1288941,0.1120406,8.9205441,203.9195)"
        id="text1450-7-7"
@@ -852,7 +852,7 @@
        y="0"><tspan
          x="1060.8568"
          y="385.5016"
-         id="tspan10577">Trimmomatic</tspan></text><text
+         id="tspan11082">Trimmomatic</tspan></text><text
        xml:space="preserve"
        transform="matrix(0.11204156,-0.12889299,0.1288941,0.1120406,167.31766,205.77368)"
        id="text1450-7-7-5"
@@ -861,7 +861,7 @@
        y="0"><tspan
          x="1061.2845"
          y="385.5016"
-         id="tspan10579">AlignmentQC</tspan></text><text
+         id="tspan11084">AlignmentQC</tspan></text><text
        xml:space="preserve"
        transform="matrix(0.11204156,-0.1288941,0.1288941,0.11204156,22.149711,269.53835)"
        id="text1450-7-7-8"
@@ -870,7 +870,7 @@
        y="0"><tspan
          x="1060.8568"
          y="385.5016"
-         id="tspan10581">Trimmomatic</tspan></text><path
+         id="tspan11086">Trimmomatic</tspan></text><path
        style="fill:none;stroke:#ff9914;stroke-width:2.92413;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 144.16717,80.939737 h 59.15651 c 7.34875,0 18.51087,-0.180477 23.70722,1.64785 4.92971,1.734501 5.87102,6.173533 5.87102,8.759182 v 19.079571"
        id="path1232-36-6"
@@ -1122,7 +1122,7 @@
        y="0"><tspan
          x="1076.9683"
          y="385.5016"
-         id="tspan10583">CountHops</tspan></text><text
+         id="tspan11088">CountHops</tspan></text><text
        xml:space="preserve"
        transform="matrix(0.11204156,-0.12889299,0.1288941,0.1120406,219.24507,201.03928)"
        id="text1450-7-7-5-4-9"
@@ -1131,7 +1131,7 @@
        y="0"><tspan
          x="1098.013"
          y="385.5016"
-         id="tspan10585">HopsQC</tspan></text><text
+         id="tspan11090">HopsQC</tspan></text><text
        xml:space="preserve"
        transform="matrix(0.11204156,-0.12889299,0.1288941,0.1120406,168.65381,264.44059)"
        id="text1450-7-7-5-4-6"
@@ -1140,7 +1140,7 @@
        y="0"><tspan
          x="1076.9683"
          y="385.5016"
-         id="tspan10587">CountHops</tspan></text><g
+         id="tspan11092">CountHops</tspan></text><g
        id="g10568"
        transform="translate(13.676358,17.12032)"><text
          xml:space="preserve"
@@ -1151,7 +1151,7 @@
          y="0"><tspan
            x="1084.7104"
            y="385.5016"
-           id="tspan10589">ConcatQC</tspan></text><text
+           id="tspan11094">ConcatQC</tspan></text><text
          xml:space="preserve"
          transform="matrix(0.11204156,-0.12889299,0.1288941,0.1120406,178.17268,256.31341)"
          id="text1450-7-7-5-4-5-2"
@@ -1160,7 +1160,7 @@
          y="0"><tspan
            x="1022.9021"
            y="385.5016"
-           id="tspan10591">ConcatAlignments`</tspan></text></g><text
+           id="tspan11096">ConcatAlignments`</tspan></text></g><text
        xml:space="preserve"
        transform="matrix(0.11204156,-0.12889299,0.1288941,0.1120406,215.70849,266.95133)"
        id="text1450-7-7-5-43"
@@ -1169,7 +1169,7 @@
        y="0"><tspan
          x="1061.2845"
          y="385.5016"
-         id="tspan10593">AlignmentQC</tspan></text><rect
+         id="tspan11098">AlignmentQC</tspan></text><rect
        style="fill:#24b064;fill-opacity:1;stroke:#24b064;stroke-width:0;stroke-dasharray:none;stroke-opacity:1"
        id="rect11188"
        width="19.210634"
