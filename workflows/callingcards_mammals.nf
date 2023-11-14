@@ -1,34 +1,19 @@
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    VALIDATE INPUTS
+    PRINT PARAMS SUMMARY
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-def valid_params = [
-    aligner       : ['bwaaln', 'bwamem2', 'bowtie', 'bowtie2'],
-    rseqc_modules  : ['bam_stat', 'inner_distance', 'infer_experiment', 'junction_annotation', 'read_distribution', 'read_duplication', 'tin']
-]
+include { paramsSummaryLog; paramsSummaryMap; fromSamplesheet } from 'plugin/nf-validation'
 
-def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
+def logo = NfcoreTemplate.logo(workflow, params.monochrome_logs)
+def citation = '\n' + WorkflowMain.citation(workflow) + '\n'
+def summary_params = paramsSummaryMap(workflow)
 
-// Validate input parameters
+// Print parameter summary log to screen
+log.info logo + paramsSummaryLog(workflow) + citation
+
 WorkflowCallingcards.initialise(params, log)
-
-// Check input path parameters to see if they exist
-def checkPathParamList = [
-    params.input,
-    params.multiqc_config,
-    params.fasta,
-    params.fasta_index,
-    params.gtf,
-    params.bwa_aln_index,
-    params.bowtie_index,
-    params.bowtie2_index]
-
-for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
-
-// Check mandatory parameters
-if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -36,16 +21,17 @@ if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input sample
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
-
-ch_multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-ch_multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
-ch_multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
-ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
-
-// CITE: nf-core/rnaseq
-ch_biotypes_header_multiqc = file("$projectDir/assets/multiqc/biotypes_header.txt", checkIfExists: true)
+ch_multiqc_config = Channel
+    .fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+ch_multiqc_custom_config = params.multiqc_config
+    ? Channel.fromPath( params.multiqc_config, checkIfExists: true )
+    : Channel.empty()
+ch_multiqc_logo = params.multiqc_logo
+    ? Channel.fromPath( params.multiqc_logo, checkIfExists: true )
+    : Channel.empty()
+ch_multiqc_custom_methods_description = params.multiqc_methods_description
+    ? file(params.multiqc_methods_description, checkIfExists: true)
+    : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -56,12 +42,10 @@ ch_biotypes_header_multiqc = file("$projectDir/assets/multiqc/biotypes_header.tx
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK } from '../subworkflows/input_check'
-include { PREPARE_GENOME } from '../subworkflows/prepare_genome'
-include { PREPARE_READS } from '../subworkflows/prepare_reads'
-include { ALIGN } from '../subworkflows/align'
-include { PROCESS_ALIGNMENTS } from '../subworkflows/process_alignments'
-
+include { PREPARE_GENOME     } from '../subworkflows/local/prepare_genome'
+include { PREPARE_READS      } from '../subworkflows/local/mammals/prepare_reads'
+include { ALIGN              } from '../subworkflows/local/align'
+include { PROCESS_ALIGNMENTS } from '../subworkflows/local/mammals/process_alignments'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,8 +56,40 @@ include { PROCESS_ALIGNMENTS } from '../subworkflows/process_alignments'
 //
 // MODULE: Installed directly from nf-core/modules
 //
+include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    VALIDATE PARAMS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+if(params.fasta){
+    ch_fasta = Channel.fromPath(params.fasta, checkIfExists: true).collect()
+} else {
+    exit 1, 'Either a valid configured `genome` or a `fasta` file must be specified.'
+}
+
+if(params.gtf){
+    ch_gtf = Channel.fromPath(params.gtf, checkIfExists:true).collect()
+} else {
+    exit 1, 'Either a valid configured `genome` or a `gtf` file must be specified.'
+}
+
+ch_regions_mask = params.regions_mask ?
+        Channel.fromPath(params.regions_mask, checkIfExists: true)
+                .collect().map{ it -> [[id:it[0].getSimpleName()], it[0]]} :
+        Channel.empty()
+
+additional_fasta = params.additional_fasta ?
+        Channel.fromPath(params.additional_fasta, checkIfExists: true).collect() :
+        Channel.empty()
+
+def rseqc_modules = params.rseqc_modules ?
+    params.rseqc_modules.split(',').collect{ it.trim().toLowerCase() } :
+    []
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -86,7 +102,6 @@ def multiqc_report = []
 
 workflow CALLINGCARDS_MAMMALS {
 
-    // instantiate channels
     ch_versions          = Channel.empty()
     ch_fasta_index       = Channel.empty()
     ch_bam_index         = Channel.empty()
@@ -94,30 +109,28 @@ workflow CALLINGCARDS_MAMMALS {
     ch_samtools_flatstat = Channel.empty()
     ch_samtools_idxstats = Channel.empty()
 
-    fasta = params.fasta?
-            Channel.fromPath(params.fasta).collect():
-            Channel.empty()
-
-    ch_gtf = Channel.fromPath(params.gtf).collect()
-
-    def rseqc_modules = params.rseqc_modules ? params.rseqc_modules.split(',').collect{ it.trim().toLowerCase() } : []
-
     //
-    // SUBWORKFLOW_1: Read in samplesheet, validate and stage input files
+    // Validate and parse samplesheet
     //
-    INPUT_CHECK (
-        ch_input
-    )
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    Channel.fromSamplesheet("input")
+        .multiMap{ sample, fastq_1, fastq_2, barcode_details ->
+            def single_end = fastq_2.size() == 0
+            if (!single_end){
+                log.info"Only the first read of the pair will be used for sample ${sample}"
+                single_end = True
+            }
+            def meta = ["id": sample, "single_end": single_end]
+            reads: [meta, [fastq_1]]
+            barcode_details: [meta, barcode_details]}
+        .set{ ch_input }
 
     //
     // SUBWORKFLOW_2: Index the genome in various ways
-    // input:
-    // output:
     //
-    // if the user does not provide an genome index, index it
     PREPARE_GENOME(
-        fasta,
+        ch_fasta,
+        ch_regions_mask,
+        additional_fasta,
         ch_gtf
     )
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
@@ -126,42 +139,50 @@ workflow CALLINGCARDS_MAMMALS {
     // SUBWORKFLOW_3: run sequencer level QC, extract barcodes and trim
     //
     PREPARE_READS (
-        INPUT_CHECK.out.reads
+        ch_input.reads
     )
     ch_versions = ch_versions.mix(PREPARE_READS.out.versions)
 
     //
     // SUBWORKFLOW_4: align reads
-    // input:
-    // output:
     //
     ALIGN (
         PREPARE_READS.out.reads,
         PREPARE_GENOME.out.bwamem2_index,
-        PREPARE_GENOME.out.bwa_aln_index,
+        PREPARE_GENOME.out.bwa_index,
         PREPARE_GENOME.out.bowtie2_index,
         PREPARE_GENOME.out.bowtie_index
     )
     ch_versions = ch_versions.mix(ALIGN.out.versions)
 
+    // join the alignment output with the ch_input.barcode_details
+    // to create a channel with structure:
+    // [val(meta), path(bam), path(bai), path(barcode_details)]
     ALIGN.out.bam
-        .join(INPUT_CHECK.out.barcode_details)
+        .map{meta, bam, bai -> [meta.id, meta, bam, bai] }
+        .combine(ch_input.barcode_details
+                    .map{meta, barcode_details ->
+                            [meta.id, barcode_details]},
+                by: 0)
+        .map{id, meta, bam, bai, barcode_details ->
+                [meta, bam, bai, barcode_details] }
         .set{ ch_aln_with_details }
 
+    //
     // SUBWORKFLOW_5: process the alignnment into a qbed file
+    //
     PROCESS_ALIGNMENTS (
         ch_aln_with_details,
-        fasta,
+        ch_fasta,
+        PREPARE_GENOME.out.fai,
         PREPARE_GENOME.out.genome_bed,
         rseqc_modules,
-        PREPARE_GENOME.out.fai,
-        ch_gtf,
-        ch_biotypes_header_multiqc
+        ch_gtf
     )
-    ch_versions          = ch_versions.mix(PROCESS_ALIGNMENTS.out.versions)
+    ch_versions = ch_versions.mix(PROCESS_ALIGNMENTS.out.versions)
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
-        ch_versions.unique{ it.text }.collectFile(name: 'collated_versions.yml')
+        ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
 
     //
@@ -170,17 +191,17 @@ workflow CALLINGCARDS_MAMMALS {
     workflow_summary    = WorkflowCallingcards.paramsSummaryMultiqc(workflow, summary_params)
     ch_workflow_summary = Channel.value(workflow_summary)
 
-    methods_description    = WorkflowCallingcards.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
+    methods_description    = WorkflowCallingcards.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description, params)
     ch_methods_description = Channel.value(methods_description)
+
 
     ch_multiqc_files = Channel.empty()
     ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    // collect process reads logs,etc
+    ch_multiqc_files = ch_multiqc_files.mix(PREPARE_READS.out.fastqc_zip.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PREPARE_READS.out.fastqc_zip.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PREPARE_READS.out.trimmomatic_log.collect{it[1]}.ifEmpty([]))
-    // collect alignment logs,etc
     ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.samtools_stats.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.samtools_flagstat.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.samtools_idxstats.collect{it[1]}.ifEmpty([]))
@@ -188,13 +209,10 @@ workflow CALLINGCARDS_MAMMALS {
     ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_bamstat.collect{it[1]}.ifEmpty([]))
 	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_inferexperiment.collect{it[1]}.ifEmpty([]))
 	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_innerdistance.collect{it[1]}.ifEmpty([]))
-	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_junctionannotation.collect{it[1]}.ifEmpty([]))
-	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_junctionsaturation.collect{it[1]}.ifEmpty([]))
 	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_readdistribution.collect{it[1]}.ifEmpty([]))
 	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_readduplication.collect{it[1]}.ifEmpty([]))
 	ch_multiqc_files = ch_multiqc_files.mix(PROCESS_ALIGNMENTS.out.rseqc_tin.collect{it[1]}.ifEmpty([]))
 
-    // Run module
     MULTIQC (
         ch_multiqc_files.collect(),
         ch_multiqc_config.toList(),
@@ -202,8 +220,6 @@ workflow CALLINGCARDS_MAMMALS {
         ch_multiqc_logo.toList()
     )
     multiqc_report = MULTIQC.out.report.toList()
-    ch_versions    = ch_versions.mix(MULTIQC.out.versions)
-
 }
 
 /*
