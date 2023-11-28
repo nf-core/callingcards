@@ -16,7 +16,7 @@ workflow PROCESS_ALIGNMENTS {
     // note that the fastq were split into chunks of equal size. meta has a
     // key: value pair split: <split_number>, eg split: 1
     aln
-    fasta                   // path(genome.fasta)
+    fasta                   // [val(meta), path(genome.fasta)]
     fai                     // [ val(meta), path(genome.fasta.fai) ]
     ch_genome_bed           // path(genome.bed)
     rseqc_modules           // [ val(module_list) ]
@@ -28,7 +28,11 @@ workflow PROCESS_ALIGNMENTS {
 
     // parition alignments into passing/failing bam files and pass on the
     // pickled qc qbed and barcode qc
-    COUNT_HOPS (  aln, fasta, fai.map{meta,fai -> fai} )
+    COUNT_HOPS (
+        aln,
+        fasta.map{meta, fasta -> fasta},
+        fai.map{meta,fai -> fai} )
+
     ch_versions = ch_versions.mix(COUNT_HOPS.out.versions)
 
     // combine the qbed pickles from the splits
@@ -64,7 +68,7 @@ workflow PROCESS_ALIGNMENTS {
         .set{ ch_bam }
 
     // merge the passing and failing sets of bams into a single bam
-    SAMTOOLS_MERGE( ch_bam, fasta.map{fasta -> ["", fasta]}, fai )
+    SAMTOOLS_MERGE( ch_bam, fasta, fai )
     ch_versions = ch_versions.mix(SAMTOOLS_MERGE.out.versions)
 
     // sort the merged bams
@@ -86,14 +90,14 @@ workflow PROCESS_ALIGNMENTS {
     // run samtools stats, flagstat and idxstats on the merged, sorted bams
     BAM_STATS_SAMTOOLS(
         ch_bam_bai,
-        fasta.map{it -> ['',it]}
+        fasta
     )
     ch_versions = ch_versions.mix(BAM_STATS_SAMTOOLS.out.versions)
 
     // run picard collectmultiplemetrics on the merged, sorted bams
     PICARD_COLLECTMULTIPLEMETRICS(
         ch_bam_bai,
-        fasta.map{it -> ['',it]},
+        fasta,
         fai
     )
     ch_versions = ch_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.versions)

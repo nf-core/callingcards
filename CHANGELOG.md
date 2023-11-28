@@ -3,6 +3,22 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.1.0 - 2023-11-28
+
+### `Removed`
+
+- local bwa_aln_to_bam local module in favor of nf-core fastq_align_bwa
+  subworkflow
+
+### `Added`
+
+- nf-core/subworkflow fastq_align_bwa subworkflow
+
+### `Changed`
+
+- input fasta channel now creates a meta map w/ key id. This id is adjusted
+  in the maskfasta and concatfasta module
+
 ## v1.0.0 - 2023-10-31
 
 ### `Fixed`
@@ -19,4 +35,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.0.0dev - 2023-01-01
 
-Initial beta version
+Initial release of nf-core/callingcards, created with the [nf-core](https://nf-co.re/) template.

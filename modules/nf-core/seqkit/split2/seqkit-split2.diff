@@ -15,7 +15,7 @@ Changes in module 'nf-core/seqkit/split2'
 
 --- modules/nf-core/seqkit/split2/environment.yml
 +++ modules/nf-core/seqkit/split2/environment.yml
-@@ -3,4 +3,4 @@
+@@ -4,4 +4,4 @@
    - bioconda
    - defaults
  dependencies:

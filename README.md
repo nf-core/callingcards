@@ -22,7 +22,7 @@ number of calling cards insertions, and provides some QC metrics.
 1. Prepare the Genome
    - optional masking with [bedtools](https://bedtools.readthedocs.io/en/latest/)
    - Create aligner specific indicies. Available aligners:
-     - [bowtie](https://bowtie-bio.sourceforge.net/index.shtml)
+     - [`bowtie`](https://bowtie-bio.sourceforge.net/index.shtml)
      - [`bowtie2`](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
      - [`bwa`](http://bio-bwa.sourceforge.net/)
      - [`bwamem2`](https://github.com/bwa-mem2/bwa-mem2)
