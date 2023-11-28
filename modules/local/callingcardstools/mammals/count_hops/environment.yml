@@ -1,0 +1,7 @@
+name: callingcardstools
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::callingcardstools=1.2.0
