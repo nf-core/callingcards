@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - input fasta channel now creates a meta map w/ key id. This id is adjusted
   in the maskfasta and concatfasta module
 
+- modules all updated to nf-core/modules current state
+
 ## v1.0.0 - 2023-10-31
 
 ### `Fixed`

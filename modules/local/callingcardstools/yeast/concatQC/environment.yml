@@ -1,3 +1,4 @@
+name: callingcardstools
 channels:
   - conda-forge
   - bioconda
