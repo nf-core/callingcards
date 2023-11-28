@@ -5,13 +5,93 @@
     "description": "An automated processing pipeline for mammalian bulk calling cards experiments",
     "type": "object",
     "definitions": {
+        "hops_counting_options": {
+            "title": "Hops counting options",
+            "type": "object",
+            "description": "Hops quantification related parameters",
+            "default": "",
+            "properties": {
+                "min_mapq": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Values with less than or equal to this mapq value will not be counted as transpositions. Defaults to 10"
+                }
+            }
+        },
+        "qc_options": {
+            "title": "QC options",
+            "type": "object",
+            "description": "Quality Control metric related parameters",
+            "default": "",
+            "properties": {
+                "rseqc_modules": {
+                    "type": "string",
+                    "default": "read_distribution",
+                    "description": "Specify the RSeQC modules to run.",
+                    "hidden": true
+                }
+            }
+        },
+        "alignment_options": {
+            "title": "Alignment options",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "aligner": {
+                    "type": "string",
+                    "default": "bwamem2",
+                    "description": "Choose one of the configured aligners. Defaults to bwamem2.",
+                    "enum": ["bwa", "bwamem2", "bowtie", "bowtie2"]
+                }
+            }
+        },
+        "read_processing_options": {
+            "title": "Read processing options",
+            "type": "object",
+            "description": "Options to control how reads are processed prior to alignment",
+            "default": "",
+            "properties": {
+                "r1_bc_pattern": {
+                    "type": "string",
+                    "description": "UMITools compliant read 1 barcode pattern. See UMITools documentation"
+                },
+                "r2_bc_pattern": {
+                    "type": "string",
+                    "description": "UMITools compliant read 2 barcode pattern. See UMITools documentation"
+                },
+                "r1_crop": {
+                    "type": "integer",
+                    "description": "If reads are single_end, this option allows the user to crop the R1 read. This occurs after trimming"
+                },
+                "gzip_concatenated_fastq": {
+                    "type": "boolean",
+                    "description": "Set to true to gzip fastq files after concatenating (assuming the fastq have been split -- see split_fastq_chunk_size). Default is false, and generally houl should not need to change this as the concat fastqs are intermediate files, easier for downstream processes to use unzipped, and will be deleted when you delete th work directory.",
+                    "hidden": true
+                },
+                "split_fastq_by_size": {
+                    "type": "integer",
+                    "description": "split_fastq_by_size or split_fastq_by_part may be set, but not both at the same time. These parameters control how many parts the input fastq files are split into for parallel processing on a cluster. See seqkit split2 for more information. By default, split_fastq_by_part is set to 10, which will split every fastq file into 10 parts. If you wish to use split_fastq_by_size, set split_fastq_by_part to null to nullify the default value."
+                },
+                "split_fastq_by_part": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "split_fastq_by_size or split_fastq_by_part may be set, but not both at the same time. These parameters control how many parts the input fastq files are split into for parallel processing on a cluster. See seqkit split2 for more information. By default, split_fastq_by_part is set to 10, which will split every fastq file into 10 parts. If you wish to use split_fastq_by_size, set split_fastq_by_part to null to nullify the default value."
+                }
+            }
+        },
         "input_output_options": {
             "title": "Input/output options",
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["input", "outdir"],
+            "required": ["datatype", "input", "outdir"],
             "properties": {
+                "datatype": {
+                    "type": "string",
+                    "description": "This determines which workflow to run based on the organism and method from which the data originates. Current options are 'yeast' and 'mammals'",
+                    "enum": ["yeast", "mammals"]
+                },
                 "input": {
                     "type": "string",
                     "format": "file-path",
@@ -20,7 +100,8 @@
                     "pattern": "^\\S+\\.csv$",
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/callingcards/usage#samplesheet-input).",
-                    "fa_icon": "fas fa-file-csv"
+                    "fa_icon": "fas fa-file-csv",
+                    "schema": "assets/input_schema.json"
                 },
                 "outdir": {
                     "type": "string",
@@ -33,12 +114,29 @@
                     "description": "Email address for completion summary.",
                     "fa_icon": "fas fa-envelope",
                     "help_text": "Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.",
-                    "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
+                    "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$",
+                    "hidden": true
                 },
                 "multiqc_title": {
                     "type": "string",
                     "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
-                    "fa_icon": "fas fa-file-signature"
+                    "fa_icon": "fas fa-file-signature",
+                    "hidden": true
+                },
+                "save_genome_intermediate": {
+                    "type": "boolean",
+                    "description": "Set to true to save intermediate files from the PREPARE_GENOME step, eg genome indicies for a given aligner",
+                    "hidden": true
+                },
+                "save_sequence_intermediate": {
+                    "type": "boolean",
+                    "description": "Set to true to save intermediate files from the PREPARE_READS step, eg chunked and demultiplexed fastq files",
+                    "hidden": true
+                },
+                "save_alignment_intermediate": {
+                    "type": "boolean",
+                    "description": "set to true to save intermediate files form the ALIGN step, eg un-indexed and unsorted bam files",
+                    "hidden": true
                 }
             }
         },
@@ -70,6 +168,56 @@
                     "fa_icon": "fas fa-ban",
                     "hidden": true,
                     "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
+                },
+                "gtf": {
+                    "type": "string",
+                    "description": "Path to GTF annotation file."
+                },
+                "regions_mask": {
+                    "type": "string",
+                    "description": "A bed file which specifies regions to hard mask in genome fasta",
+                    "pattern": "^\\S+\\.bed$",
+                    "format": "file-path",
+                    "mimetype": "text/plain"
+                },
+                "fasta_index": {
+                    "type": "string",
+                    "description": "Path to FASTA genome file.",
+                    "pattern": "^\\S+\\.fai$",
+                    "format": "file-path",
+                    "mimetype": "text/plain",
+                    "hidden": true
+                },
+                "additional_fasta": {
+                    "type": "string",
+                    "description": "Additional sequences which will be appended to the genomic fasta file after masking",
+                    "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
+                    "format": "file-path",
+                    "mimetype": "text/plain"
+                },
+                "bwa_index": {
+                    "type": "string",
+                    "description": "path to the bwaaln index. only used if aligner is bwaaln. if the aligner is bwaaln and this is not provided, the index is created in the pipeline",
+                    "format": "directory-path",
+                    "hidden": true
+                },
+                "bwamem2_index": {
+                    "type": "string",
+                    "description": "path to the bwamem2 index. only used if aligner is bwamem2. if the aligner is bwamem2 and this is not provided, the index is created in the pipeline",
+                    "format": "directory-path",
+                    "hidden": true
+                },
+                "bowtie_index": {
+                    "type": "string",
+                    "description": "path to the bowtie index. only used if aligner is bowtie. if the aligner is bowtie and this is not provided, the index is created in the pipeline",
+                    "format": "directory-path",
+                    "hidden": true
+                },
+                "bowtie2_index": {
+                    "type": "string",
+                    "description": "path to the bowtie2 index. only used if aligner is bowtie2. if the aligner is bowtie2 and this is not provided, the index is created in the pipeline",
+                    "format": "directory-path",
+                    "hidden": true
                 }
             }
         },
@@ -269,6 +417,18 @@
         }
     },
     "allOf": [
+        {
+            "$ref": "#/definitions/hops_counting_options"
+        },
+        {
+            "$ref": "#/definitions/qc_options"
+        },
+        {
+            "$ref": "#/definitions/alignment_options"
+        },
+        {
+            "$ref": "#/definitions/read_processing_options"
+        },
         {
             "$ref": "#/definitions/input_output_options"
         },

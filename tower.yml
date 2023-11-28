@@ -3,3 +3,13 @@ reports:
     display: "MultiQC HTML report"
   samplesheet.csv:
     display: "Auto-created samplesheet with collated metadata and FASTQ paths"
+  "**/hops/**/*.qbed":
+    display: "All qBed hop files"
+  "**/hops/**/*_summary.tsv":
+    display: "Post alignment hop QC summary"
+  "**/hops/**/*_srt_count.tsv":
+    display: "(mammals only) SRT QC overview"
+  "**/sequence/**/*_r1_primer_summary.csv":
+    display: "(yeast only) R1 primer centric barcode summary"
+  "**/sequence/**/*_r2_transposon_summary.csv":
+    display: "(yeast only) R2 transposon centric barcode summary"
