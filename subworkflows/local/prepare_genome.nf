@@ -63,7 +63,7 @@ workflow PREPARE_GENOME {
             ch_bwamem2_index = BWAMEM2_INDEX.out.index
             ch_versions = ch_versions.mix(BWAMEM2_INDEX.out.versions)
         } else{
-            ch_bwamem2_index = Channel.of(["",params.bwamem2_index]).collect()
+            ch_bwamem2_index = Channel.of([[id: 'input_genome_index'],params.bwamem2_index])
         }
 
     } else if (params.aligner == 'bwa'){
@@ -73,7 +73,7 @@ workflow PREPARE_GENOME {
             ch_bwa_index = BWA_INDEX.out.index
             ch_versions = ch_versions.mix(BWA_INDEX.out.versions)
         } else{
-            ch_bwa_index = Channel.of(["",params.bwa_index]).collect()
+            ch_bwa_index = Channel.of([[id: 'input_genome_index'],params.bwa_index]).collect()
         }
 
     } else if (params.aligner == 'bowtie2'){
@@ -83,7 +83,7 @@ workflow PREPARE_GENOME {
             ch_bowtie2_index = BOWTIE2_BUILD.out.index
             ch_versions = ch_versions.mix(BOWTIE2_BUILD.out.versions)
         } else{
-            ch_bowtie2_index = Channel.of(["",params.bowtie2_index]).collect()
+            ch_bowtie2_index = Channel.of([[id: 'input_genome_index'],params.bowtie2_index]).collect()
         }
 
     } else if (params.aligner == 'bowtie'){
