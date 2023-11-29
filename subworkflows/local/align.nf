@@ -15,7 +15,7 @@ include { BOWTIE_ALIGN       } from "${projectDir}/modules/nf-core/bowtie/align/
 workflow ALIGN {
     take:
     reads           // channel: [ val(meta), [ reads ] ]
-    bwamem2_index         // channel: file(fasta)
+    bwamem2_index   // channel: file(fasta)
     bwa_aln_index
     bowtie2_index
     bowtie_index
@@ -50,22 +50,6 @@ workflow ALIGN {
 
     } else if (params.aligner == 'bwa') {
 
-        // BWA_ALN (
-        //     reads,
-        //     bwa_aln_index
-        // )
-        // ch_versions = ch_versions.mix(BWA_ALN.out.versions)
-
-        // BWA_ALN_TO_BAM (
-        //     reads.join(BWA_ALN.out.sai),
-        //     bwa_aln_index
-        // )
-        // ch_versions = ch_versions.mix(BWA_ALN.out.versions)
-
-        // SAMTOOLS_INDEX(
-        //     BWA_ALN_TO_BAM.out.bam
-        // )
-        // ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
         FASTQ_ALIGN_BWAALN(
             reads,
             bwa_aln_index
