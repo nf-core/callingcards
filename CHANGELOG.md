@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Special thanks to the following for their reviews and assistance:
 
 - [Maxime Garcia](https://github.com/maxulysse)
+- [Friederike Hanssen](https://github.com/FriederikeHanssen)
 - [Alyssa Briggs](https://github.com/alyssa-ab)
 - [Sateesh Peri](https://github.com/sateeshperi)
 
