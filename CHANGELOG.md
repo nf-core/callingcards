@@ -3,11 +3,19 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v1.0.0 - 2023-11-28
+## 1.0.0 - 2023-11-28
+
+### Credits
+
+Special thanks to the following for their reviews and assistance:
+
+- [Maxime Garcia](https://github.com/maxulysse)
+- [Alyssa Briggs](https://github.com/alyssa-ab)
+- [Sateesh Peri](https://github.com/sateeshperi)
 
 ### `Fixed`
 
-- workflow `datatype` option for mammasl workflow corrected to `mammals`
+- workflow `datatype` option for mammals workflow corrected to `mammals`
 
 - the modules running the callingCardsTools package were updated with the bioconda containers/conda paths. `callingCardsTools` updated to 1.2.0
 
@@ -33,6 +41,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - modules all updated to nf-core/modules current state
 
-## v0.0.0dev - 2023-01-01
+## 0.0.0dev - 2023-01-01
 
 Initial release of nf-core/callingcards, created with the [nf-core](https://nf-co.re/) template.
