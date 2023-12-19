@@ -4,18 +4,18 @@
 // in the include ... from ... path below
 //
 
-include { SAMTOOLS_SORT } from "${projectDir}/modules/nf-core/samtools/sort/main"
-include { SAMTOOLS_INDEX } from "${projectDir}/modules/nf-core/samtools/index/main"
-include { BWAMEM2_MEM    } from "${projectDir}/modules/nf-core/bwamem2/mem/main"
-include { BWA_ALN        } from "${projectDir}/modules/nf-core/bwa/aln/main"
-include { BWA_ALN_TO_BAM } from "${projectDir}/modules/local/bwa_aln_to_bam/main"
-include { BOWTIE2_ALIGN    } from "${projectDir}/modules/nf-core/bowtie2/align/main"
-include { BOWTIE_ALIGN    } from "${projectDir}/modules/nf-core/bowtie/align/main"
+include { SAMTOOLS_SORT      } from "${projectDir}/modules/nf-core/samtools/sort/main"
+include { SAMTOOLS_INDEX     } from "${projectDir}/modules/nf-core/samtools/index/main"
+include { BWAMEM2_MEM        } from "${projectDir}/modules/nf-core/bwamem2/mem/main"
+include { BWA_ALN            } from "${projectDir}/modules/nf-core/bwa/aln/main"
+include { FASTQ_ALIGN_BWAALN } from "${projectDir}/subworkflows/nf-core/fastq_align_bwaaln/main"
+include { BOWTIE2_ALIGN      } from "${projectDir}/modules/nf-core/bowtie2/align/main"
+include { BOWTIE_ALIGN       } from "${projectDir}/modules/nf-core/bowtie/align/main"
 
 workflow ALIGN {
     take:
     reads           // channel: [ val(meta), [ reads ] ]
-    bwamem2_index         // channel: file(fasta)
+    bwamem2_index   // channel: file(fasta)
     bwa_aln_index
     bowtie2_index
     bowtie_index
@@ -50,26 +50,15 @@ workflow ALIGN {
 
     } else if (params.aligner == 'bwa') {
 
-        BWA_ALN (
+        FASTQ_ALIGN_BWAALN(
             reads,
             bwa_aln_index
         )
-        ch_versions = ch_versions.mix(BWA_ALN.out.versions)
-
-        BWA_ALN_TO_BAM (
-            reads.join(BWA_ALN.out.sai),
-            bwa_aln_index
-        )
-        ch_versions = ch_versions.mix(BWA_ALN.out.versions)
-
-        SAMTOOLS_INDEX(
-            BWA_ALN_TO_BAM.out.bam
-        )
-        ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
+        ch_versions = ch_versions.mix(FASTQ_ALIGN_BWAALN.out.versions)
 
         // TODO figure out how to mix without using a tmp ch
-        BWA_ALN_TO_BAM.out.bam
-            .join(SAMTOOLS_INDEX.out.bai)
+        FASTQ_ALIGN_BWAALN.out.bam
+            .join(FASTQ_ALIGN_BWAALN.out.bai)
             .set{ ch_tmp }
 
         ch_bam = ch_bam.mix(ch_tmp)

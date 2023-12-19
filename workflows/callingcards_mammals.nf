@@ -68,6 +68,7 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 
 if(params.fasta){
     ch_fasta = Channel.fromPath(params.fasta, checkIfExists: true).collect()
+        .map{ it -> [[id:it[0].getSimpleName()], it[0]]}
 } else {
     exit 1, 'Either a valid configured `genome` or a `fasta` file must be specified.'
 }

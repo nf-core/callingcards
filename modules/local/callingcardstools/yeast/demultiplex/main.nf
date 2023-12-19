@@ -35,6 +35,5 @@ process DEMULTIPLEX {
     "${task.process}":
         callingcardstools: \$(echo \$(callingcardstools --version 2>&1) | sed 's/.* //')
     END_VERSIONS
-
     """
 }

@@ -337,8 +337,7 @@ channel](https://nfcore.slack.com/channels/configs).
 
 ## Azure Resource Requests
 
-To be used with the `azurebatch` profile by specifying the `-profile
-azurebatch`. We recommend providing a compute `params.vm_type` of
+To be used with the `azurebatch` profile by specifying the `-profile azurebatch`. We recommend providing a compute `params.vm_type` of
 `Standard_D16_v3` VMs by default but these options can be changed if required.
 
 Note that the choice of VM size depends on your quota and the overall workload

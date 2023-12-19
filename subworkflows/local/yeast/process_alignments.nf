@@ -10,7 +10,7 @@ include { SAMTOOLS_INDEX                } from "../../../modules/nf-core/samtool
 workflow PROCESS_ALIGNMENTS {
     take:
     aln            // [ val(meta), path(bam), path(bai), path(barcode_details) ]
-    fasta          // path(genome.fasta)
+    fasta          // [val(meta), path(genome.fasta)]
     fai            // [ val(meta), path(genome.fasta.fai) ]
     ch_genome_bed  // [ path(genome.bed) ]
     rseqc_modules  // [ val(module_list) ]
@@ -24,7 +24,7 @@ workflow PROCESS_ALIGNMENTS {
     // qc metrics
     COUNT_HOPS (
         aln,
-        fasta,
+        fasta.map{meta, fasta -> fasta},
         fai.map{meta,fai -> fai}
     )
     ch_versions = ch_versions.mix(COUNT_HOPS.out.versions)
@@ -55,14 +55,14 @@ workflow PROCESS_ALIGNMENTS {
     // run samtools stats, flagstat and idxstats on the merged, sorted bams
     BAM_STATS_SAMTOOLS(
         ch_parse_bam_out,
-        fasta.map{it -> ['',it]},
+        fasta,
     )
     ch_versions = ch_versions.mix(BAM_STATS_SAMTOOLS.out.versions)
 
     // run picard collectmultiplemetrics on the merged, sorted bams
     PICARD_COLLECTMULTIPLEMETRICS(
         ch_parse_bam_out,
-        fasta.map{it -> ['',it]},
+        fasta,
         fai
     )
     ch_versions = ch_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.versions)
@@ -86,12 +86,12 @@ workflow PROCESS_ALIGNMENTS {
     samtools_flagstat        = BAM_STATS_SAMTOOLS.out.flagstat
     samtools_idxstats        = BAM_STATS_SAMTOOLS.out.idxstats
     picard_qc                = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
-    rseqc_bamstat            = BAM_RSEQC.out.bamstat_txt
-    rseqc_inferexperiment    = BAM_RSEQC.out.inferexperiment_txt
-    rseqc_innerdistance      = BAM_RSEQC.out.innerdistance_freq
-    rseqc_readdistribution   = BAM_RSEQC.out.readdistribution_txt
-    rseqc_readduplication    = BAM_RSEQC.out.readduplication_pos_xls
-    rseqc_tin                = BAM_RSEQC.out.tin_txt
+    rseqc_bamstat            = BAM_RSEQC.out.ch_bamstat
+    rseqc_inferexperiment    = BAM_RSEQC.out.ch_inferexperiment
+    rseqc_innerdistance      = BAM_RSEQC.out.ch_innerdistance_freq
+    rseqc_readdistribution   = BAM_RSEQC.out.ch_readdistribution
+    rseqc_readduplication    = BAM_RSEQC.out.ch_readduplication_pos_xls
+    rseqc_tin                = BAM_RSEQC.out.ch_tin
     versions                 = ch_versions
 }
 
