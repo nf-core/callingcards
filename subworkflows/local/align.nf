@@ -75,12 +75,12 @@ workflow ALIGN {
         ch_versions = ch_versions.mix(BOWTIE2_ALIGN.out.versions)
 
         SAMTOOLS_INDEX(
-            BOWTIE2_ALIGN.out.bam
+            BOWTIE2_ALIGN.out.aligned
         )
         ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
 
         // TODO figure out how to mix without using a tmp ch
-        BOWTIE2_ALIGN.out.bam
+        BOWTIE2_ALIGN.out.aligned
             .join(SAMTOOLS_INDEX.out.bai)
             .set{ ch_tmp }
 
