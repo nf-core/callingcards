@@ -1,0 +1,47 @@
+nextflow_workflow {
+
+    name "Test Mammals Workflow PIPELINE_INITIALISATION"
+    script "../main.nf"
+    workflow "PIPELINE_INITIALISATION"
+
+    test("test Mammals PIPELINE_INITIALISATION successfully completes with valid parameters") {
+
+        when {
+            params {
+                config_profile_name        = 'Mammals Test Profile'
+                config_profile_description = 'Minimal test dataset to check mammals pipeline function'
+
+                datatype                   = 'mammals'
+                input                      = 'https://raw.githubusercontent.com/nf-core/test-datasets/callingcards/mammals/samplesheet.csv'
+                fasta                      = 'https://raw.githubusercontent.com/nf-core/test-datasets/callingcards/mammals/chr1.fa'
+                gtf                        = 'https://raw.githubusercontent.com/nf-core/test-datasets/callingcards/mammals/chr1.gtf'
+                aligner                    = 'bwamem2'
+                r1_bc_pattern              = 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN'
+                r1_crop                    = 40
+                min_mapq                   = 10
+                max_cpus                   = 10
+                max_memory                 = '14.GB'
+                split_fastq_by_part        = null
+                split_fastq_by_size        = 10000
+            }
+            workflow {
+                """
+                input[0] = false                               // version (boolean)
+                input[1] = false                               // help (boolean)
+                input[2] = "${projectDir}/nextflow_schema.json" // schema (string)
+                input[3] = true                                // validate_parameters (boolean)
+                input[4] = true                                // monochrome_logs (boolean)
+                input[5] = args                                // args (array)
+                input[6] = file("$outputDir")                   // outdir (string)
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success}
+            )
+        }
+
+    }
+}

@@ -33,6 +33,60 @@ include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_call
 //   This is an example of how to use getGenomeAttribute() to fetch parameters
 //   from igenomes.config using `--genome`
 params.fasta = getGenomeAttribute('fasta')
+params.gtf = getGenomeAttribute('gtf')
+
+
+if (params.datatype == 'yeast'){
+    if(params.genome == 'R64-1-1'){
+        log.info"${projectDir}"
+        params.regions_mask = "${projectDir}/assets/yeast/igenomes/R64-1-1/regions_mask.bed"
+        log.info"Using default regions mask for yeast analysis: ${params.regions_mask}"
+
+        params.fasta_index = null
+        log.info"Genome fasta will be indexed in the workflow"
+    }
+    if(!params.containsKey('additional_fasta')){
+        params.additional_fasta = "${projectDir}/assets/yeast/plasmid_sequences.fasta"
+        log.info"Using default plasmid sequences for yeast analysis: ${params.additional_fasta}"
+    }
+}
+
+if (params.genome == 'GRCm38'){
+    if(params.aligner == 'bwa'){
+        params.bwa_index = WorkflowMain.getGenomeAttribute(params, 'bwa')
+    }
+}
+
+if(!params.containsKey('regions_mask')){
+    params.regions_mask = null
+    log.info"Regions mask not specified. The entire genome will be used for alignment"
+}
+
+if(!params.containsKey('additional_fasta')){
+    params.additional_fasta = null
+    log.info"Additional fasta not specified. No additional sequences beyond those in the genome fasta will be used for alignment"
+}
+
+if (!params.containsKey('fasta_index')){
+    params.fasta_index = null
+    log.info"Genome fasta will be indexed in the workflow"
+}
+
+// these parameters are used in the pipeline and may or may not be set either
+// by the user or through the --genome argument. If they are null, then
+// the appropriate index will be created in the workflow
+if(!params.containsKey('bwa_index')){
+    params.bwa_index = null
+}
+if(!params.containsKey('bwamem2_index')){
+    params.bwamem2_index = null
+}
+if(!params.containsKey('bowtie_index')){
+    params.bowtie_index = null
+}
+if(!params.containsKey('bowtie2_index')){
+    params.bowtie2_index = null
+}
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -46,15 +100,50 @@ params.fasta = getGenomeAttribute('fasta')
 workflow NFCORE_CALLINGCARDS {
 
     take:
-    samplesheet // channel: samplesheet read in from --input
+    reads
+    barcode_details
 
     main:
+
+    println params.genome
+
+    if(params.fasta){
+        ch_fasta = Channel.fromPath(params.fasta, checkIfExists: true).collect()
+            .map{ it -> [[id:it[0].getSimpleName()], it[0]]}
+    } else {
+        exit 1, 'Either a valid configured `genome` or a `fasta` file must be specified.'
+    }
+
+    if(params.gtf){
+        ch_gtf = Channel.fromPath(params.gtf, checkIfExists:true).collect()
+    } else {
+        exit 1, 'Either a valid configured `genome` or a `gtf` file must be specified.'
+    }
+
+    ch_regions_mask = params.regions_mask ?
+            Channel.fromPath(params.regions_mask, checkIfExists: true)
+                    .collect().map{ it -> [[id:it[0].getSimpleName()], it[0]]} :
+            Channel.empty()
+
+    additional_fasta = params.additional_fasta ?
+            Channel.fromPath(params.additional_fasta, checkIfExists: true).collect() :
+            Channel.empty()
+
+    def rseqc_modules = params.rseqc_modules ?
+        params.rseqc_modules.split(',').collect{ it.trim().toLowerCase() } :
+        []
 
     //
     // WORKFLOW: Run pipeline
     //
     CALLINGCARDS (
-        samplesheet
+        reads,
+        barcode_details,
+        ch_fasta,
+        ch_gtf,
+        ch_regions_mask,
+        additional_fasta,
+        rseqc_modules
     )
 
     emit:
@@ -88,7 +177,8 @@ workflow {
     // WORKFLOW: Run main workflow
     //
     NFCORE_CALLINGCARDS (
-        PIPELINE_INITIALISATION.out.samplesheet
+        PIPELINE_INITIALISATION.out.reads,
+        PIPELINE_INITIALISATION.out.barcode_details
     )
 
     //

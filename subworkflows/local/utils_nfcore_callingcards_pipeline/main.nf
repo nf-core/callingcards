@@ -80,29 +80,58 @@ workflow PIPELINE_INITIALISATION {
     //
     // Create channel from input file provided through params.input
     //
-    Channel
-        .fromSamplesheet("input")
-        .map {
-            meta, fastq_1, fastq_2 ->
-                if (!fastq_2) {
-                    return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
-                } else {
-                    return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
+    if (params.datatype == 'yeast'){
+
+        Channel.fromSamplesheet("input")
+            .multiMap{ sample, fastq_1, fastq_2, barcode_details ->
+                def single_end = fastq_2.size() == 0
+                if (single_end){
+                    exit "Currently the yeast pipeline expects " +
+                    "paired end reads due to the barcodes."
                 }
-        }
-        .groupTuple()
-        .map {
-            validateInputSamplesheet(it)
-        }
-        .map {
-            meta, fastqs ->
-                return [ meta, fastqs.flatten() ]
-        }
-        .set { ch_samplesheet }
+                def meta = ["id": sample, "single_end": single_end]
+                reads: [meta, [fastq_1, fastq_2]]
+                barcode_details: [meta, barcode_details]}
+            .set{ ch_samplesheet }
+    } else if (params.datatype == 'mammals'){
+
+        Channel.fromSamplesheet("input")
+            .multiMap{ sample, fastq_1, fastq_2, barcode_details ->
+                def single_end = fastq_2.size() == 0
+                if (!single_end){
+                    log.info"Only the first read of the pair will be used for sample ${sample}"
+                    single_end = True
+                }
+                def meta = ["id": sample, "single_end": single_end]
+                reads: [meta, [fastq_1]]
+                barcode_details: [meta, barcode_details]}
+            .set{ ch_samplesheet }
+    }
+
+    // Channel
+    //     .fromSamplesheet("input")
+    //     .map {
+    //         meta, fastq_1, fastq_2 ->
+    //             if (!fastq_2) {
+    //                 return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
+    //             } else {
+    //                 return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
+    //             }
+    //     }
+    //     .groupTuple()
+    //     .map {
+    //         validateInputSamplesheet(it)
+    //     }
+    //     .map {
+    //         meta, fastqs ->
+    //             return [ meta, fastqs.flatten() ]
+    //     }
+    //     .set { ch_samplesheet }
 
     emit:
-    samplesheet = ch_samplesheet
-    versions    = ch_versions
+    reads           = ch_samplesheet.reads
+    barcode_details = ch_samplesheet.barcode_details
+    versions        = ch_versions
 }
 
 /*
