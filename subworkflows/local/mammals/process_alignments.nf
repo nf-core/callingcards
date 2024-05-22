@@ -72,7 +72,7 @@ workflow PROCESS_ALIGNMENTS {
     ch_versions = ch_versions.mix(SAMTOOLS_MERGE.out.versions)
 
     // sort the merged bams
-    SAMTOOLS_SORT( SAMTOOLS_MERGE.out.bam )
+    SAMTOOLS_SORT( SAMTOOLS_MERGE.out.bam, [[], []] )
     ch_versions = ch_versions.mix(SAMTOOLS_SORT.out.versions)
 
     // index the merged, sorted bams
@@ -120,12 +120,12 @@ workflow PROCESS_ALIGNMENTS {
     samtools_flagstat        = BAM_STATS_SAMTOOLS.out.flagstat
     samtools_idxstats        = BAM_STATS_SAMTOOLS.out.idxstats
     picard_qc                = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
-    rseqc_bamstat            = BAM_RSEQC.out.ch_bamstat
-    rseqc_inferexperiment    = BAM_RSEQC.out.ch_inferexperiment
-    rseqc_innerdistance      = BAM_RSEQC.out.ch_innerdistance_freq
-    rseqc_readdistribution   = BAM_RSEQC.out.ch_readdistribution
-    rseqc_readduplication    = BAM_RSEQC.out.ch_readduplication_pos_xls
-    rseqc_tin                = BAM_RSEQC.out.ch_tin
+    rseqc_bamstat            = BAM_RSEQC.out.bamstat_txt
+    rseqc_inferexperiment    = BAM_RSEQC.out.inferexperiment_txt
+    rseqc_innerdistance      = BAM_RSEQC.out.innerdistance_freq
+    rseqc_readdistribution   = BAM_RSEQC.out.readdistribution_txt
+    rseqc_readduplication    = BAM_RSEQC.out.readduplication_pos_xls
+    rseqc_tin                = BAM_RSEQC.out.tin_txt
     versions                 = ch_versions
 }
 

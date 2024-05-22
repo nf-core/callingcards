@@ -46,6 +46,7 @@ workflow PREPARE_GENOME {
             ch_fasta,
             additional_fasta
         )
+        ch_versions = ch_versions.mix(CONCATFASTA.out.versions)
 
         ch_fasta = CONCATFASTA.out.fasta
             .map{meta, fasta -> [[id: 'concat_' + meta.id], fasta]}

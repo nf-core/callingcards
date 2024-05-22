@@ -103,7 +103,7 @@ workflow CALLINGCARDS {
     ch_versions = ch_versions.mix(ALIGN.out.versions)
 
     if (params.datatype == 'yeast'){
-        // create a channel from the ch_input barcode details
+        // create a channel from the ch_barcode details
         // of structure [ [id: sample_id], path(barcode_details) ]
         // this will be used to join the barcode_details to the alignments
         ch_barcode_details
@@ -121,7 +121,7 @@ workflow CALLINGCARDS {
             .set{ ch_aln_with_details }
 
         //
-        // SUBWORKFLOW_5: process the alignnment into a qbed file
+        // SUBWORKFLOW_3: process the alignnment into a qbed file
         // input: 'bam' with structure [ val(meta), path(bam),
         //                               path(bai), path(barcode_details) ],
         //       'fasta' (genome fasta), 'genome_bed' (genome bed),
@@ -157,12 +157,12 @@ workflow CALLINGCARDS {
 
 
     } else if (params.datatype == 'mammals'){
-        // join the alignment output with the ch_input.barcode_details
+        // join the alignment output with the ch_barcode_details
         // to create a channel with structure:
         // [val(meta), path(bam), path(bai), path(barcode_details)]
         ALIGN.out.bam
             .map{meta, bam, bai -> [meta.id, meta, bam, bai] }
-            .combine(ch_input.barcode_details
+            .combine(ch_barcode_details
                         .map{meta, barcode_details ->
                                 [meta.id, barcode_details]},
                     by: 0)
@@ -171,7 +171,7 @@ workflow CALLINGCARDS {
             .set{ ch_aln_with_details }
 
         //
-        // SUBWORKFLOW_5: process the alignnment into a qbed file
+        // SUBWORKFLOW_4: process the alignnment into a qbed file
         //
         MAMMALS_PROCESS_ALIGNMENTS (
             ch_aln_with_details,

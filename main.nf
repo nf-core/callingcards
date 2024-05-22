@@ -29,12 +29,10 @@ include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_call
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// TODO nf-core: Remove this line if you don't need a FASTA file
 //   This is an example of how to use getGenomeAttribute() to fetch parameters
 //   from igenomes.config using `--genome`
 params.fasta = getGenomeAttribute('fasta')
 params.gtf = getGenomeAttribute('gtf')
-
 
 if (params.datatype == 'yeast'){
     if(params.genome == 'R64-1-1'){
@@ -104,8 +102,6 @@ workflow NFCORE_CALLINGCARDS {
     barcode_details
 
     main:
-
-    println params.genome
 
     if(params.fasta){
         ch_fasta = Channel.fromPath(params.fasta, checkIfExists: true).collect()
