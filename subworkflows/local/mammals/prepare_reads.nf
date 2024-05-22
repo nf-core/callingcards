@@ -42,7 +42,7 @@ workflow PREPARE_READS {
                 "nf-core/callingcards slack channel. Otherwise, re-submit " +
                 "with only fastq_1 in the samplesheet."
             }
-            [WorkflowCallingcards.add_split(meta, read1.getName()), [read1]]}
+            [add_split(meta, read1.getName()), [read1]]}
         .set{ ch_split_reads }
 
     // run umi extract to add barcodes to fastq id lines
@@ -73,3 +73,28 @@ workflow PREPARE_READS {
     versions = ch_versions // channel: [ versions.yml ]
 }
 
+// Groovy functions
+
+def extractDigitBeforeExtension(String path) {
+    // Regex pattern to match the digit before the file extension
+    def pattern = /(\d+)(?=\.(fastq|fastq\.gz|fq|fq\.gz)$)/
+
+    // Extract the digit
+    def matcher = path =~ pattern
+    if (matcher.find()) {
+        return matcher[0][1].toInteger()
+    } else {
+        return null
+    }
+}
+
+def add_split(Map meta, String read){
+    def new_meta = [:]
+
+    meta.each{ k,v ->
+        new_meta[k] = v}
+
+    new_meta.split = extractDigitBeforeExtension(read)
+
+    return new_meta
+}

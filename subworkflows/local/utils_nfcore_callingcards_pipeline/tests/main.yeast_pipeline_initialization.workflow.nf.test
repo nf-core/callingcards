@@ -1,0 +1,52 @@
+nextflow_workflow {
+
+    name "Test Yeast Workflow PIPELINE_INITIALISATION"
+    script "../main.nf"
+    workflow "PIPELINE_INITIALISATION"
+
+    test("test Yeast PIPELINE_INITIALISATION successfully completes with valid parameters") {
+
+        when {
+            params {
+                // Genome references
+                config_profile_name         = 'Yeast Test Profile'
+                config_profile_description  = 'Minimal test dataset to check Yeast pipeline functions'
+
+                datatype                    = 'yeast'
+                input                       = 'https://raw.githubusercontent.com/cmatKhan/test-datasets/callingcards/yeast/samplesheet.csv'
+                genome                      = 'R64-1-1'
+                aligner                     = 'bwamem2'
+                split_fastq_by_part         = null
+                split_fastq_by_size         = 100
+                r1_crop                     = 75
+                min_mapq                    = 10
+                max_cpus                    = 2
+                max_memory                  = '6.GB'
+                max_time                    = '6.h'
+                save_genome_intermediate    = true
+                save_sequence_intermediate  = true
+                save_alignment_intermediate = true
+            }
+            workflow {
+                """
+                input[0] = false                                // version (boolean)
+                input[1] = false                                // help (boolean)
+                input[2] = true                                 // validate_parameters (boolean)
+                input[3] = true                                 // monochrome_logs (boolean)
+                input[4] = args                                 // array: List of positional nextflow CLI args
+                input[5] = file("$outputDir")                   // outdir (string)
+                input[6] = 'https://raw.githubusercontent.com/cmatKhan/test-datasets/callingcards/yeast/samplesheet.csv'
+
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success}
+            )
+        }
+
+    }
+
+}
