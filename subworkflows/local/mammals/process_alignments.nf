@@ -84,8 +84,8 @@ workflow PROCESS_ALIGNMENTS {
     // join the merged, sorted bam channel with the index channel to create
     // ch_bam_bai with structure [ val(meta), path(bam), path(bai) ]
     SAMTOOLS_SORT.out.bam
-      .join(SAMTOOLS_INDEX.out.bai)
-      .set{ ch_bam_bai }
+        .join(SAMTOOLS_INDEX.out.bai)
+        .set{ ch_bam_bai }
 
     // run samtools stats, flagstat and idxstats on the merged, sorted bams
     BAM_STATS_SAMTOOLS(

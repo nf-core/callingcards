@@ -227,7 +227,7 @@ def remove_read_end(Map meta) {
 
 // sort split files by the split digit in the iflename
 def sortFilesBySplit(ArrayBag<Path> files) {
-     // Define a closure that extracts the digit surrounded by underscores
+    // Define a closure that extracts the digit surrounded by underscores
     def extractDigit = { String path ->
         def pattern = /_(\d+)_/
         def matcher = path =~ pattern
