@@ -238,7 +238,7 @@ def toolCitationText() {
     // Uncomment function in methodsDescriptionText to render in MultiQC report
     def citation_text = [
             "Tools used in the workflow included:",
-            "bedtools (Quilan et all 2010)",
+            "bedtools (Quinlan et all 2010)",
             "bowtie (Langmead et al. 2009)",
             "bowtie2 (Langmead et al. 2012)",
             "bwa (Li and Durbin 2009)",
