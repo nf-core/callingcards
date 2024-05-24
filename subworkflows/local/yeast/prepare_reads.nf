@@ -43,7 +43,7 @@ workflow PREPARE_READS {
     SEQKIT_SPLIT2.out.reads
         .transpose()
         .map{ meta, read ->
-            [WorkflowCallingcards.add_split(meta, read.getName()), read]}
+            [add_split(meta, read.getName()), read]}
         .groupTuple()
         .map{meta, reads ->
                 [meta.id, meta, reads]}
@@ -115,7 +115,7 @@ workflow PREPARE_READS {
     // switch single_end to true in meta and select only R1
     demux_concat_reads
         .map{ meta, reads ->
-            [WorkflowCallingcards.to_single_end(meta), reads[0]]}
+            [to_single_end(meta), reads[0]]}
             .set{ trimmomatic_input }
 
     // trim the end of the reads based on params.r1_crop
@@ -148,6 +148,42 @@ workflow PREPARE_READS {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 import nextflow.util.ArrayBag
+
+def extractDigitBeforeExtension(String path) {
+    // Regex pattern to match the digit before the file extension
+    def pattern = /(\d+)(?=\.(fastq|fastq\.gz|fq|fq\.gz)$)/
+
+    // Extract the digit
+    def matcher = path =~ pattern
+    if (matcher.find()) {
+        return matcher[0][1].toInteger()
+    } else {
+        return null
+    }
+}
+
+def add_split(Map meta, String read){
+    def new_meta = [:]
+
+    meta.each{ k,v ->
+        new_meta[k] = v}
+
+    new_meta.split = extractDigitBeforeExtension(read)
+
+    return new_meta
+}
+
+def to_single_end(Map meta) {
+
+    def new_meta = [:]
+
+    meta.each{ k,v ->
+        new_meta[k] = v}
+
+    new_meta.single_end = true
+
+    return new_meta
+}
 
 // Extract R1 or R2 from the file name
 def extractReadType(String path) {
@@ -191,7 +227,7 @@ def remove_read_end(Map meta) {
 
 // sort split files by the split digit in the iflename
 def sortFilesBySplit(ArrayBag<Path> files) {
-     // Define a closure that extracts the digit surrounded by underscores
+    // Define a closure that extracts the digit surrounded by underscores
     def extractDigit = { String path ->
         def pattern = /_(\d+)_/
         def matcher = path =~ pattern

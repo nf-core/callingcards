@@ -7,7 +7,6 @@
 include { SAMTOOLS_SORT      } from "${projectDir}/modules/nf-core/samtools/sort/main"
 include { SAMTOOLS_INDEX     } from "${projectDir}/modules/nf-core/samtools/index/main"
 include { BWAMEM2_MEM        } from "${projectDir}/modules/nf-core/bwamem2/mem/main"
-include { BWA_ALN            } from "${projectDir}/modules/nf-core/bwa/aln/main"
 include { FASTQ_ALIGN_BWAALN } from "${projectDir}/subworkflows/nf-core/fastq_align_bwaaln/main"
 include { BOWTIE2_ALIGN      } from "${projectDir}/modules/nf-core/bowtie2/align/main"
 include { BOWTIE_ALIGN       } from "${projectDir}/modules/nf-core/bowtie/align/main"
@@ -32,6 +31,7 @@ workflow ALIGN {
         BWAMEM2_MEM (
             reads,
             bwamem2_index,
+            [[],[]],
             sort_bam
         )
         ch_versions = ch_versions.mix(BWAMEM2_MEM.out.versions)
@@ -69,6 +69,7 @@ workflow ALIGN {
         BOWTIE2_ALIGN (
             reads,
             bowtie2_index,
+            [[],[]], // fasta channel -- only necessary for cram output. not implemented
             save_unaligned,
             sort_bam
         )
@@ -95,7 +96,8 @@ workflow ALIGN {
         ch_versions = ch_versions.mix(BOWTIE_ALIGN.out.versions)
 
         SAMTOOLS_SORT(
-            BOWTIE_ALIGN.out.bam
+            BOWTIE_ALIGN.out.bam,
+            [[], []] // blank channels for fasta input
         )
         ch_versions = ch_versions.mix(SAMTOOLS_SORT.out.versions)
 

@@ -46,6 +46,7 @@ workflow PREPARE_GENOME {
             ch_fasta,
             additional_fasta
         )
+        ch_versions = ch_versions.mix(CONCATFASTA.out.versions)
 
         ch_fasta = CONCATFASTA.out.fasta
             .map{meta, fasta -> [[id: 'concat_' + meta.id], fasta]}
@@ -63,7 +64,7 @@ workflow PREPARE_GENOME {
             ch_bwamem2_index = BWAMEM2_INDEX.out.index
             ch_versions = ch_versions.mix(BWAMEM2_INDEX.out.versions)
         } else{
-            ch_bwamem2_index = Channel.of([[id: 'input_genome_index'],params.bwamem2_index])
+            ch_bwamem2_index = Channel.of([[id: 'input_genome_index'],params.bwamem2_index]).collect()
         }
 
     } else if (params.aligner == 'bwa'){
@@ -104,7 +105,7 @@ workflow PREPARE_GENOME {
     if (!params.fasta_index){
         SAMTOOLS_FAIDX (
             ch_fasta,
-             [['id':null], []]
+            [['id':null], []]
         )
         ch_versions = ch_versions.mix(SAMTOOLS_FAIDX.out.versions)
         ch_fasta_index = SAMTOOLS_FAIDX.out.fai

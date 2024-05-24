@@ -13,11 +13,26 @@ nextflow.enable.dsl = 2
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT FUNCTIONS / MODULES / SUBWORKFLOWS / WORKFLOWS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+include { CALLINGCARDS  } from './workflows/callingcards'
+include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_callingcards_pipeline'
+include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_callingcards_pipeline'
+
+include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_callingcards_pipeline'
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     GENOME PARAMETER VALUES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-params.fasta = WorkflowMain.getGenomeAttribute(params, 'fasta')
-params.gtf = WorkflowMain.getGenomeAttribute(params, 'gtf')
+
+//   This is an example of how to use getGenomeAttribute() to fetch parameters
+//   from igenomes.config using `--genome`
+params.fasta = getGenomeAttribute('fasta')
+params.gtf = getGenomeAttribute('gtf')
 
 if (params.datatype == 'yeast'){
     if(params.genome == 'R64-1-1'){
@@ -70,86 +85,110 @@ if(!params.containsKey('bowtie_index')){
 if(!params.containsKey('bowtie2_index')){
     params.bowtie2_index = null
 }
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    VALIDATE & PRINT PARAMETER SUMMARY
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-include { validateParameters; paramsHelp } from 'plugin/nf-validation'
-
-// Print help message if needed
-if (params.help) {
-    def logo = NfcoreTemplate.logo(workflow, params.monochrome_logs)
-    def citation = '\n' + WorkflowMain.citation(workflow) + '\n'
-    def String command = "nextflow run ${workflow.manifest.name} --input samplesheet.csv --genome R64-1-1 -profile singularity"
-    log.info logo + paramsHelp(command) + citation + NfcoreTemplate.dashedLine(params.monochrome_logs)
-    System.exit(0)
-}
-
-// Validate input parameters
-if (params.validate_params) {
-    validateParameters()
-}
-
-// Validate some of the more idiosyncratic parameters specific to callingcards
-if (params.split_fastq_by_size != null && params.split_fastq_by_part != null){
-    exit 1, 'You have specified both `split_fastq_by_size` and `split_fastq_by_part`.' +
-    ' Please specify only one of these parameters. The other should be null.'
-}
-
-// Check that nonsensical combinations of parameters are not set
-if (params.additional_fasta && (params.bwa_index || params.bwamem2_index || params.bowtie_index || params.bowtie2_index)) {
-    exit 1, 'You have specified an additional fasta file and a genome index.' +
-    ' If the genome index is not equivalent to the main fasta file,' +
-    ' then omit the index and allow the pipeline to create it from' +
-    ' the concatenated fasta files.'
-}
-
-if (params.datatype == "mammals" && params.r1_bc_pattern == null){
-    exit 1, 'You have not specified a barcode pattern for mammalian data.' +
-    ' Please specify a barcode pattern using the `r1_bc_pattern` parameter.'
-}
-
-WorkflowMain.initialise(workflow, params, log)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    NAMED WORKFLOW FOR PIPELINE
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-include { CALLINGCARDS_YEAST   } from './workflows/callingcards_yeast'
-include { CALLINGCARDS_MAMMALS } from './workflows/callingcards_mammals'
-
-//
-// WORKFLOW: Run main nf-core/callingcards analysis pipeline
-//
-workflow NFCORE_CALLINGCARDS_MAMMALS {
-    CALLINGCARDS_MAMMALS ()
-}
-
-workflow NFCORE_CALLINGCARDS_YEAST {
-    CALLINGCARDS_YEAST ()
-}
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    RUN ALL WORKFLOWS
+    NAMED WORKFLOWS FOR PIPELINE
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
 //
-// WORKFLOW: Execute a single named workflow for the pipeline
-// See: https://github.com/nf-core/rnaseq/issues/619
+// WORKFLOW: Run main analysis pipeline depending on type of input
 //
-workflow {
-    if(params.datatype == 'mammals'){
-        NFCORE_CALLINGCARDS_MAMMALS ()
-    } else if (params.datatype == 'yeast'){
-        NFCORE_CALLINGCARDS_YEAST ()
+workflow NFCORE_CALLINGCARDS {
+
+    take:
+    reads
+    barcode_details
+
+    main:
+
+    if(params.fasta){
+        ch_fasta = Channel.fromPath(params.fasta, checkIfExists: true).collect()
+            .map{ it -> [[id:it[0].getSimpleName()], it[0]]}
+    } else {
+        exit 1, 'Either a valid configured `genome` or a `fasta` file must be specified.'
     }
 
+    if(params.gtf){
+        ch_gtf = Channel.fromPath(params.gtf, checkIfExists:true).collect()
+    } else {
+        exit 1, 'Either a valid configured `genome` or a `gtf` file must be specified.'
+    }
+
+    ch_regions_mask = params.regions_mask ?
+            Channel.fromPath(params.regions_mask, checkIfExists: true)
+                    .collect().map{ it -> [[id:it[0].getSimpleName()], it[0]]} :
+            Channel.empty()
+
+    additional_fasta = params.additional_fasta ?
+            Channel.fromPath(params.additional_fasta, checkIfExists: true).collect() :
+            Channel.empty()
+
+    def rseqc_modules = params.rseqc_modules ?
+        params.rseqc_modules.split(',').collect{ it.trim().toLowerCase() } :
+        []
+
+    //
+    // WORKFLOW: Run pipeline
+    //
+    CALLINGCARDS (
+        reads,
+        barcode_details,
+        ch_fasta,
+        ch_gtf,
+        ch_regions_mask,
+        additional_fasta,
+        rseqc_modules
+    )
+
+    emit:
+    multiqc_report = CALLINGCARDS.out.multiqc_report // channel: /path/to/multiqc_report.html
+
+}
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    RUN MAIN WORKFLOW
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+workflow {
+
+    main:
+
+    //
+    // SUBWORKFLOW: Run initialisation tasks
+    //
+    PIPELINE_INITIALISATION (
+        params.version,
+        params.help,
+        params.validate_params,
+        params.monochrome_logs,
+        args,
+        params.outdir,
+        params.input
+    )
+
+    //
+    // WORKFLOW: Run main workflow
+    //
+    NFCORE_CALLINGCARDS (
+        PIPELINE_INITIALISATION.out.reads,
+        PIPELINE_INITIALISATION.out.barcode_details
+    )
+
+    //
+    // SUBWORKFLOW: Run completion tasks
+    //
+    PIPELINE_COMPLETION (
+        params.email,
+        params.email_on_fail,
+        params.plaintext_email,
+        params.outdir,
+        params.monochrome_logs,
+        params.hook_url,
+        NFCORE_CALLINGCARDS.out.multiqc_report
+    )
 }
 
 /*

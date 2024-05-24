@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 1.0.0 - 2023-11-28
+## 1.0.0 - 2024-05-24
 
 ### Credits
 
@@ -13,6 +13,7 @@ Special thanks to the following for their reviews and assistance:
 - [Friederike Hanssen](https://github.com/FriederikeHanssen)
 - [Alyssa Briggs](https://github.com/alyssa-ab)
 - [Sateesh Peri](https://github.com/sateeshperi)
+- [James Fellows Yates](https://github.com/jfy133)
 
 ### `Fixed`
 
@@ -20,7 +21,7 @@ Special thanks to the following for their reviews and assistance:
 
 - the modules running the callingCardsTools package were updated with the bioconda containers/conda paths. `callingCardsTools` updated to 1.2.0
 
-- template update to v2.10. nf-core modules updated
+- template update to v2.14.1 nf-core modules updated
 
 - Nextflow `splitFastq` operator replaced by seqkit/split2 module
 
