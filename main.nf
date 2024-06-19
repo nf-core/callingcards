@@ -51,7 +51,7 @@ if (params.datatype == 'yeast'){
 
 if (params.genome == 'GRCm38'){
     if(params.aligner == 'bwa'){
-        params.bwa_index = WorkflowMain.getGenomeAttribute(params, 'bwa')
+        params.bwa_index = getGenomeAttribute(params, 'bwa')
     }
 }
 
