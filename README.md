@@ -1,8 +1,3 @@
-# nf-core/CallingCards is now archived
-
-This project is no longer under active maintenance. You're welcome to use it, but no updates or bug fixes will be posted.
-
-If anyone is interested in taking over maintenance, please contact [Chase Mateusiak](https://github.com/cmatKhan)
 > [!WARNING]
 > # nf-core/CallingCards is now archived
 > 
